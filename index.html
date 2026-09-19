@@ -1,109 +1,201 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="classic">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>欲罷不能 Can't Stop</title>
-<meta name="description" content="經典桌遊《欲罷不能》(Can't Stop) 網頁版：五階 AI、本地雙人、霓虹科技風。">
-<meta name="theme-color" content="#020617">
+<meta name="description" content="經典桌遊《欲罷不能》(Can't Stop) 網頁版：五階 AI、本地雙人、三種風格（原版桌遊／霓虹科技／POP）。">
+<meta name="theme-color" content="#e9dabb">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<script>try{document.documentElement.dataset.theme=JSON.parse(localStorage.getItem('cantstop.prefs.v1')||'{}').theme||'classic';}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800&family=Fredoka:wght@500;600;700&family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <style>
+/* =====================================================================
+ * 主題 token：皮膚全部集中在這三個區塊，結構樣式只吃變數
+ *   classic = 原版實體桌遊（紅色停車牌棋盤，預設）／ neon = 霓虹科技 ／ pop = POP 普普
+ *   --gr/--ga = 發光半徑/濃度（非霓虹主題歸零）；--hard = POP 的硬陰影；--bw = 邊框粗細
+ * ===================================================================== */
 :root{
-  --p1:#39ff14; --p2:#ff2d95; --run:#00d4ff; --danger:#ff3b3b; --pa:#00d4ff; --pb:#c084fc;
-  --cw:clamp(30px,4.4vw,56px); --ch:clamp(22px,5.2vh,42px); --ds:58px;
+  --ds:58px;
+  --font-disp:'Bitter','Noto Sans TC',serif;--disp-ls:.02em;
+  --page:radial-gradient(120vw 70vh at 50% -10%,#f8edd3,transparent 70%),#e4d3b0;--page-solid:#eadbbc;
+  --deco:repeating-linear-gradient(91deg,rgba(120,84,40,.06) 0 2px,transparent 2px 11px),repeating-linear-gradient(89deg,rgba(120,84,40,.04) 0 1px,transparent 1px 27px);
+  --deco-size:auto;--deco-op:1;--deco-mask:none;
+  --ink:#33261a;--ink-dim:#6f5d48;--ink-faint:#9a8768;
+  --panel-bg:linear-gradient(170deg,#fcf6e6,#f2e6ca);--panel-bd:#b89868;--panel-sh:0 2px 0 #cdb58a,0 10px 24px rgba(84,56,20,.2);--panel-r:14px;--panel-blur:none;
+  --bw:1px;--hard:0 0 0 transparent;--gr:0px;--ga:0%;
+  --p1:#23934f;--p2:#2a66b3;--run:#fffdf4;--p1-ink:#1b7a41;--p2-ink:#2459a0;--accent:#b3261e;--accent-ink:#a3221b;
+  --danger:#c62828;--ok:#23934f;--warn:#d98a00;
+  --title-c:#b3261e;--title-sh:0 2px 0 #fff6dc,0 5px 0 rgba(84,56,20,.22);--title-anim:none;
+  --board-bg:radial-gradient(circle at 50% 35%,#d8382f,#a81d1d 75%);--board-bd:#7d1414;--board-clip:polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%);
+  --cell-bg:#fff8e4;--cell-bd:#e2cf9b;--cell-r:5px;--cell-sh:inset 0 -2px 0 rgba(120,84,40,.12);
+  --top-bg:#ffd84d;--top-bd:#c79a00;--lab:#ffd9cf;--lab-on:#ffe27a;--hl:#fff;--hl-fill:rgba(255,255,255,.14);
+  --tgt:#ffb300;--claim-mix:62%;
+  --die-bg:linear-gradient(145deg,#fffdf6,#efe6d0);--die-bd:#c9b88f;--die-pip:#2b2119;--die-r:11px;--die-sh:inset 0 -3px 6px rgba(120,84,40,.18);--pa:#c0392b;--pa-pip:#c0392b;--pb:#2a66b3;--pb-pip:#2a66b3;
+  --input-bg:#fffaf0;--input-bd:#b89868;--trk-off:#d9c8a2;--thumb:#fff;
+  --roll-bg:linear-gradient(#c93a30,#a81d1d);--roll-fg:#fff;--roll-sh:0 4px 0 #6f1210;--stop-bg:linear-gradient(#2ba25b,#1c7c43);--stop-fg:#fff;--stop-bd:transparent;--stop-sh:0 4px 0 #125a2f;
+  --start-bg:linear-gradient(#c93a30,#a81d1d);--start-fg:#fff;--start-sh:0 4px 0 #6f1210;--ghost-bg:#fffaf0;--ghost-bd:#b89868;--ghost-fg:#4a3a28;--btn-bd:transparent;
+  --seg-bg:#e9dbb9;--seg-on-bg:#fffaf0;--seg-on-fg:#a3221b;--seg-on-sh:0 0 0 1.5px #b3261e,0 2px 0 rgba(84,56,20,.2);
+  --card-bg:#fffaf0;--card-bd:#c9b088;--num-ok:#33261a;--sub-bg:rgba(255,250,240,.7);--avatar-bg:#fffaf0;--peak-off:#d9c8a2;
+  --ov-bg:rgba(240,228,200,.97);
 }
-@media (max-width:1023px){ :root{ --cw:min(8.2vw,46px); --ch:clamp(18px,3.3vh,30px); --ds:52px; } }
+[data-theme=neon]{
+  --font-disp:'Orbitron','Noto Sans TC',sans-serif;--disp-ls:.06em;
+  --page:radial-gradient(60vw 40vh at 12% 0%,rgba(57,255,20,.10),transparent 70%),radial-gradient(60vw 45vh at 92% 8%,rgba(255,45,149,.12),transparent 70%),radial-gradient(70vw 50vh at 50% 110%,rgba(0,212,255,.14),transparent 70%),#020617;--page-solid:#020617;
+  --deco:linear-gradient(rgba(0,212,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.10) 1px,transparent 1px);
+  --deco-size:44px 44px;--deco-op:.35;--deco-mask:radial-gradient(ellipse at 50% 40%,#000 10%,transparent 75%);
+  --ink:#e2e8f0;--ink-dim:#94a3b8;--ink-faint:#64748b;
+  --panel-bg:linear-gradient(160deg,rgba(15,23,42,.88),rgba(2,6,23,.88));--panel-bd:rgba(100,116,139,.28);--panel-sh:0 0 0 1px rgba(0,212,255,.05),0 12px 40px rgba(0,0,0,.5);--panel-r:16px;--panel-blur:blur(8px);
+  --gr:10px;--ga:70%;
+  --p1:#39ff14;--p2:#ff2d95;--run:#00d4ff;--p1-ink:#39ff14;--p2-ink:#ff2d95;--accent:#00d4ff;--accent-ink:#00d4ff;
+  --danger:#ff3b3b;--ok:#39ff14;--warn:#facc15;
+  --title-c:#fff;--title-sh:0 0 6px #fff,0 0 18px #00d4ff,0 0 42px #00d4ff,0 0 80px rgba(0,212,255,.6);--title-anim:flicker 5s infinite;
+  --board-bg:var(--panel-bg);--board-bd:var(--panel-bd);--board-clip:none;
+  --cell-bg:rgba(15,23,42,.9);--cell-bd:rgba(71,85,105,.5);--cell-r:6px;--cell-sh:none;
+  --top-bg:linear-gradient(180deg,rgba(250,204,21,.16),rgba(15,23,42,.9));--top-bd:rgba(250,204,21,.55);--lab:#64748b;--lab-on:#00d4ff;--hl:#00d4ff;--hl-fill:rgba(0,212,255,.06);
+  --tgt:#00d4ff;--claim-mix:18%;
+  --die-bg:linear-gradient(145deg,#16213d,#060b19);--die-bd:#475569;--die-pip:#e2e8f0;--die-r:12px;--die-sh:inset 0 0 12px rgba(0,212,255,.18);--pa:#00d4ff;--pa-pip:#00d4ff;--pb:#c084fc;--pb-pip:#c084fc;
+  --input-bg:#0b1224;--input-bd:rgba(100,116,139,.45);--trk-off:#334155;--thumb:#fff;
+  --roll-bg:linear-gradient(135deg,#0891b2,#00d4ff);--roll-fg:#020617;--roll-sh:0 0 18px rgba(0,212,255,.55),inset 0 0 12px rgba(255,255,255,.25);
+  --stop-bg:rgba(2,6,23,.6);--stop-fg:#39ff14;--stop-bd:#39ff14;--stop-sh:0 0 14px rgba(57,255,20,.35),inset 0 0 10px rgba(57,255,20,.12);
+  --start-bg:linear-gradient(135deg,#39ff14,#00d4ff);--start-fg:#020617;--start-sh:0 0 26px rgba(57,255,20,.5);--ghost-bg:rgba(15,23,42,.7);--ghost-bd:rgba(100,116,139,.45);--ghost-fg:#cbd5e1;
+  --seg-bg:rgba(2,6,23,.7);--seg-on-bg:rgba(0,212,255,.14);--seg-on-fg:#fff;--seg-on-sh:0 0 0 1px #00d4ff,0 0 16px rgba(0,212,255,.4);
+  --card-bg:rgba(2,6,23,.75);--card-bd:rgba(0,212,255,.35);--num-ok:#fff;--sub-bg:rgba(2,6,23,.65);--avatar-bg:#0b1224;--peak-off:#1e293b;
+  --ov-bg:rgba(2,6,23,.94);
+}
+[data-theme=pop]{
+  --font-disp:'Fredoka','Noto Sans TC',sans-serif;--disp-ls:.01em;
+  --page:radial-gradient(#FFD9A8 1.6px,transparent 1.7px) 0 0/18px 18px,#FFF1DC;--page-solid:#FFF1DC;
+  --deco:none;--deco-op:0;
+  --ink:#2B2140;--ink-dim:#65597C;--ink-faint:#8f84a3;
+  --panel-bg:#fff;--panel-bd:#2B2140;--panel-sh:4px 4px 0 #2B2140;--panel-r:18px;--panel-blur:none;
+  --bw:2.5px;--hard:3px 3px 0 #2B2140;
+  --p1:#2FD08F;--p2:#FF6FAE;--run:#FFD447;--p1-ink:#0E9C77;--p2-ink:#E8468E;--accent:#FF6FAE;--accent-ink:#E8468E;
+  --danger:#D92C4A;--ok:#0E9C77;--warn:#f59f00;
+  --title-c:#2B2140;--title-sh:none;--title-anim:none;
+  --board-bg:#8EC9FF;--board-bd:#2B2140;--board-clip:none;
+  --cell-bg:#fff;--cell-bd:#2B2140;--cell-r:8px;--cell-sh:none;
+  --top-bg:#2B2140;--top-bd:#2B2140;--lab:#2B2140;--lab-on:#E8468E;--hl:#2B2140;--hl-fill:rgba(255,255,255,.35);
+  --tgt:#FFD447;--claim-mix:75%;
+  --die-bg:#fff;--die-bd:#2B2140;--die-pip:#2B2140;--die-r:12px;--die-sh:none;--pa:#2B2140;--pa-pip:#E8468E;--pb:#2B2140;--pb-pip:#2f8fe6;
+  --input-bg:#fff;--input-bd:#2B2140;--trk-off:#fff;--thumb:#FFD447;
+  --roll-bg:#FFD447;--roll-fg:#2B2140;--roll-sh:3px 3px 0 #2B2140;--stop-bg:#7BE3C8;--stop-fg:#2B2140;--stop-bd:#2B2140;--stop-sh:3px 3px 0 #2B2140;
+  --start-bg:#FF6FAE;--start-fg:#2B2140;--start-sh:4px 4px 0 #2B2140;--ghost-bg:#fff;--ghost-bd:#2B2140;--ghost-fg:#2B2140;--btn-bd:#2B2140;
+  --seg-bg:#FFE3BD;--seg-on-bg:#FFD447;--seg-on-fg:#2B2140;--seg-on-sh:0 0 0 2.5px #2B2140,3px 3px 0 #2B2140;
+  --card-bg:#fff;--card-bd:#2B2140;--num-ok:#2B2140;--sub-bg:#FFF1DC;--avatar-bg:#fff;--peak-off:#e6dcef;
+  --ov-bg:rgba(255,241,220,.97);
+}
+
 *{-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#020617;color:#e2e8f0;overflow-x:hidden}
-.orb{font-family:'Orbitron','Noto Sans TC',sans-serif}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--page-solid);color:var(--ink);overflow-x:hidden}
+[data-theme=pop] body{font-family:'Fredoka','Noto Sans TC',system-ui,sans-serif;font-weight:500}
+.orb{font-family:var(--font-disp);letter-spacing:var(--disp-ls)}
+.dim{color:var(--ink-dim)}.faint{color:var(--ink-faint)}.t-danger{color:var(--danger)}
+.glow-t{text-shadow:0 0 var(--gr) color-mix(in srgb,currentColor var(--ga),transparent)}
 /* ---------- 背景 ---------- */
-#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:
-   radial-gradient(60vw 40vh at 12% 0%,rgba(57,255,20,.10),transparent 70%),
-   radial-gradient(60vw 45vh at 92% 8%,rgba(255,45,149,.12),transparent 70%),
-   radial-gradient(70vw 50vh at 50% 110%,rgba(0,212,255,.14),transparent 70%),#020617}
-#bg::after{content:'';position:absolute;inset:0;opacity:.35;
-  background-image:linear-gradient(rgba(0,212,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.10) 1px,transparent 1px);
-  background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 40%,#000 10%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 10%,transparent 75%)}
-.panel{background:linear-gradient(160deg,rgba(15,23,42,.88),rgba(2,6,23,.88));border:1px solid rgba(100,116,139,.28);border-radius:16px;
-  box-shadow:0 0 0 1px rgba(0,212,255,.05),0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
-.neon-title{color:#fff;text-shadow:0 0 6px #fff,0 0 18px var(--run),0 0 42px var(--run),0 0 80px rgba(0,212,255,.6);animation:flicker 5s infinite}
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--page)}
+#bg::after{content:'';position:absolute;inset:0;opacity:var(--deco-op);background-image:var(--deco);background-size:var(--deco-size);mask-image:var(--deco-mask);-webkit-mask-image:var(--deco-mask)}
+#topfade{position:fixed;top:0;left:0;right:0;height:calc(64px + env(safe-area-inset-top));z-index:45;pointer-events:none;background:linear-gradient(var(--page-solid) 55%,transparent)}
+.panel{background:var(--panel-bg);border:var(--bw) solid var(--panel-bd);border-radius:var(--panel-r);box-shadow:var(--panel-sh);backdrop-filter:var(--panel-blur);-webkit-backdrop-filter:var(--panel-blur)}
+.title{font-family:var(--font-disp);color:var(--title-c);text-shadow:var(--title-sh);animation:var(--title-anim)}
+[data-theme=pop] .title{display:inline-block;background:#FFD447;border:3px solid #2B2140;border-radius:22px;padding:.12em .5em;box-shadow:6px 6px 0 #2B2140;transform:rotate(-2deg);font-weight:700}
 @keyframes flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.72}}
-.t-p1{color:var(--p1);text-shadow:0 0 10px rgba(57,255,20,.7)}
-.t-p2{color:var(--p2);text-shadow:0 0 10px rgba(255,45,149,.7)}
-.t-run{color:var(--run);text-shadow:0 0 10px rgba(0,212,255,.7)}
-/* ---------- 按鈕 ---------- */
-.btn{position:relative;border-radius:12px;font-weight:700;letter-spacing:.04em;padding:.8rem 1rem;transition:transform .15s,box-shadow .2s,filter .2s,opacity .2s;border:1px solid transparent;user-select:none}
+.t-p1{color:var(--p1-ink);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--p1) var(--ga),transparent)}
+.t-p2{color:var(--p2-ink);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--p2) var(--ga),transparent)}
+.t-run{color:var(--accent-ink);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--accent) var(--ga),transparent)}
+/* ---------- 按鈕 / 表單 ---------- */
+.btn{position:relative;border-radius:12px;font-weight:700;letter-spacing:.04em;padding:.8rem 1rem;transition:transform .15s,box-shadow .2s,filter .2s,opacity .2s;border:var(--bw) solid var(--btn-bd);user-select:none}
 .btn:not(:disabled):hover{transform:translateY(-2px)}
-.btn:not(:disabled):active{transform:translateY(1px) scale(.98)}
-.btn:disabled{opacity:.32;cursor:not-allowed;filter:grayscale(.6)}
-.btn-roll{background:linear-gradient(135deg,#0891b2,#00d4ff);color:#020617;box-shadow:0 0 18px rgba(0,212,255,.55),inset 0 0 12px rgba(255,255,255,.25)}
-.btn-stop{background:rgba(2,6,23,.6);color:var(--p1);border-color:var(--p1);box-shadow:0 0 14px rgba(57,255,20,.35),inset 0 0 10px rgba(57,255,20,.12)}
-.btn-start{background:linear-gradient(135deg,#39ff14,#00d4ff);color:#020617;box-shadow:0 0 26px rgba(57,255,20,.5)}
-.btn-ghost{background:rgba(15,23,42,.7);border-color:rgba(100,116,139,.45);color:#cbd5e1}
-.btn-ghost:hover{border-color:var(--run);color:#fff}
+.btn:not(:disabled):active{transform:translateY(2px) scale(.98)}
+.btn:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.6)}
+.btn-roll{background:var(--roll-bg);color:var(--roll-fg);box-shadow:var(--roll-sh)}
+.btn-stop{background:var(--stop-bg);color:var(--stop-fg);border-color:var(--stop-bd);box-shadow:var(--stop-sh)}
+.btn-start{background:var(--start-bg);color:var(--start-fg);box-shadow:var(--start-sh)}
+.btn-ghost{background:var(--ghost-bg);border:max(1px,var(--bw)) solid var(--ghost-bd);color:var(--ghost-fg);box-shadow:var(--hard)}
+.btn-ghost:hover{border-color:var(--accent)}
 .btn-sm{padding:.34rem .75rem}.btn-md{padding:.5rem .75rem}.sel-sm{padding:.28rem .5rem;max-width:132px}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:14px;background:rgba(2,6,23,.7);border:1px solid rgba(100,116,139,.3)}
-.seg button{border-radius:10px;padding:.7rem .5rem;font-weight:700;color:#94a3b8;transition:all .2s}
-.seg button.on{background:rgba(0,212,255,.14);color:#fff;box-shadow:0 0 0 1px var(--run),0 0 16px rgba(0,212,255,.4)}
-select,.sel{background:#0b1224;border:1px solid rgba(100,116,139,.45);border-radius:10px;color:#e2e8f0;padding:.5rem .6rem;outline:none}
-select:focus{border-color:var(--run);box-shadow:0 0 0 2px rgba(0,212,255,.25)}
-input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--run) var(--v,60%),#334155 var(--v,60%));outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--run);cursor:pointer}
-input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--run);cursor:pointer}
-/* ---------- BGM ---------- */
-#bgm{position:fixed;top:10px;right:10px;z-index:60;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px}
-#bgmPlay{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(0,212,255,.12);border:1px solid var(--run);color:var(--run);box-shadow:0 0 10px rgba(0,212,255,.35);transition:all .2s}
-#bgmPlay.on{background:var(--run);color:#020617;box-shadow:0 0 18px var(--run)}
-.eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq i{width:3px;background:var(--run);border-radius:2px;height:3px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:14px;background:var(--seg-bg);border:max(1px,var(--bw)) solid var(--panel-bd)}
+.seg.three{grid-template-columns:repeat(3,1fr)}
+.seg button{border-radius:10px;padding:.7rem .4rem;font-weight:700;color:var(--ink-dim);transition:all .2s;font-size:.9rem}
+.seg button.on{background:var(--seg-on-bg);color:var(--seg-on-fg);box-shadow:var(--seg-on-sh)}
+.sw{display:flex;justify-content:center;gap:3px;margin-bottom:5px}.sw i{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(0,0,0,.35)}
+select,.sel{background:var(--input-bg);border:max(1px,var(--bw)) solid var(--input-bd);border-radius:10px;color:var(--ink);padding:.5rem .6rem;outline:none}
+select:focus{border-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:linear-gradient(90deg,var(--accent) var(--v,60%),var(--trk-off) var(--v,60%));outline:none;border:calc(var(--bw) - 1px) solid var(--input-bd)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--thumb);border:max(1px,calc(var(--bw) - .5px)) solid var(--input-bd);box-shadow:0 0 var(--gr) var(--accent);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--thumb);border:max(1px,calc(var(--bw) - .5px)) solid var(--input-bd);cursor:pointer}
+/* ---------- 頂端固定列（含瀏海安全區） ---------- */
+#bgm{position:fixed;top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right));z-index:60;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px}
+#topLeft{position:fixed;top:calc(10px + env(safe-area-inset-top));left:calc(10px + env(safe-area-inset-left));z-index:50;display:flex;align-items:center;gap:8px}
+#bgmPlay,#btnTheme{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;transition:all .2s}
+#bgmPlay{background:color-mix(in srgb,var(--accent) 14%,transparent);border:max(1px,var(--bw)) solid var(--accent);color:var(--accent-ink);box-shadow:0 0 var(--gr) color-mix(in srgb,var(--accent) 40%,transparent)}
+#bgmPlay.on{background:var(--accent);color:var(--page-solid)}
+[data-theme=pop] #bgmPlay{border-color:var(--ink);color:var(--ink);background:#FFD447}[data-theme=pop] #bgmPlay.on{background:#FF6FAE;color:var(--ink)}
+#btnTheme{height:auto;width:auto;border-radius:12px;font-size:15px;line-height:1}
+.eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq i{width:3px;background:var(--accent);border-radius:2px;height:3px}
 .eq.on i{animation:eq 1s ease-in-out infinite}.eq.on i:nth-child(2){animation-delay:.2s}.eq.on i:nth-child(3){animation-delay:.45s}
 @keyframes eq{0%,100%{height:3px}50%{height:14px}}
+#lobby{padding:calc(84px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
 /* ---------- 大廳統計 ---------- */
-.stat{border-radius:14px;padding:14px 12px;background:rgba(2,6,23,.65);border:1px solid rgba(100,116,139,.25);text-align:center;position:relative;overflow:hidden}
-.stat::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--c,var(--run));box-shadow:0 0 12px var(--c,var(--run))}
-.stat b{display:block;font-family:'Orbitron',sans-serif;font-size:1.9rem;line-height:1.1;color:var(--c,var(--run));text-shadow:0 0 12px var(--c,var(--run))}
-.stat span{font-size:.74rem;color:#94a3b8}
-.stat small{display:block;font-size:.66rem;color:#64748b;margin-top:2px}
-/* ---------- 遊戲版面 ---------- */
-#gameGrid{display:grid;gap:12px;grid-template-areas:"players" "board" "ctrl"}
-@media (min-width:1024px){#gameGrid{grid-template-columns:minmax(0,1fr) 410px;grid-template-rows:auto 1fr;grid-template-areas:"board players" "board ctrl";gap:16px}}
+.stat{border-radius:14px;padding:14px 12px;background:var(--sub-bg);border:max(1px,var(--bw)) solid var(--card-bd);text-align:center;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--c);box-shadow:0 0 var(--gr) var(--c)}
+.stat b{display:block;font-family:var(--font-disp);font-size:1.9rem;line-height:1.1;color:var(--c);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--c) var(--ga),transparent)}
+.stat span{font-size:.74rem;color:var(--ink-dim)}
+.stat small{display:block;font-size:.66rem;color:var(--ink-faint);margin-top:2px}
+.bar{background:var(--trk-off);border:calc(var(--bw) - 1px) solid var(--input-bd)}
+/* ---------- 遊戲版面：整頁剛好一個視窗高，棋盤吃剩餘空間（不必捲動、不會被頂列蓋到） ---------- */
+#game{height:100dvh;box-sizing:border-box;overflow:hidden auto;
+  padding:calc(60px + env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+#gameGrid{height:100%;max-width:72rem;margin:0 auto;display:grid;gap:10px;grid-template-rows:auto minmax(250px,1fr) auto;grid-template-areas:"players" "board" "ctrl"}
+@media (min-width:1024px){
+  #game{padding-left:16px;padding-right:16px;padding-bottom:16px}
+  #gameGrid{grid-template-columns:minmax(0,1fr) 410px;grid-template-rows:auto 1fr;grid-template-areas:"board players" "board ctrl";gap:16px}
+  #ctrl{align-self:start}
+}
 #players{grid-area:players}#boardWrap{grid-area:board}#ctrl{grid-area:ctrl}
-.pcard{border-radius:14px;padding:10px 12px;border:1px solid rgba(100,116,139,.25);background:rgba(2,6,23,.6);transition:all .3s;opacity:.55}
-.pcard.active{opacity:1}
-.pcard.p0.active{border-color:var(--p1);box-shadow:0 0 18px rgba(57,255,20,.3),inset 0 0 18px rgba(57,255,20,.08)}
-.pcard.p1.active{border-color:var(--p2);box-shadow:0 0 18px rgba(255,45,149,.3),inset 0 0 18px rgba(255,45,149,.08)}
-.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:#0b1224;border:2px solid var(--c);box-shadow:0 0 10px var(--c);flex:none}
+.pcard{border-radius:14px;padding:10px 12px;border:max(1px,var(--bw)) solid var(--card-bd);background:var(--sub-bg);transition:all .3s;opacity:.55}
+.pcard.active{opacity:1;border-color:var(--c);box-shadow:0 0 calc(var(--gr)*1.8) color-mix(in srgb,var(--c) 30%,transparent),inset 0 0 18px color-mix(in srgb,var(--c) 8%,transparent),var(--hard)}
+[data-theme=classic] .pcard.active{box-shadow:0 0 0 2px var(--c),0 3px 0 color-mix(in srgb,var(--c) 60%,#000)}
+[data-theme=pop] .pcard.active{border-color:var(--ink);background:color-mix(in srgb,var(--c) 35%,#fff)}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--avatar-bg);border:2px solid var(--c);box-shadow:0 0 var(--gr) var(--c);flex:none}
+[data-theme=pop] .avatar{border:2.5px solid var(--ink);background:var(--c)}
 .avatar.breath{animation:breath 1.5s ease-in-out infinite}
-@keyframes breath{0%,100%{box-shadow:0 0 4px var(--c),0 0 0 0 rgba(255,45,149,.0)}50%{box-shadow:0 0 22px var(--c),0 0 0 7px rgba(255,45,149,.18)}}
-.peak{width:14px;height:14px;clip-path:polygon(50% 0,100% 100%,0 100%);background:#1e293b;transition:all .3s}
-.peak.on{background:var(--c);filter:drop-shadow(0 0 6px var(--c))}
+@keyframes breath{0%,100%{box-shadow:0 0 4px var(--c),0 0 0 0 color-mix(in srgb,var(--c) 0%,transparent)}50%{box-shadow:0 0 18px var(--c),0 0 0 7px color-mix(in srgb,var(--c) 22%,transparent)}}
+.peak{width:14px;height:14px;clip-path:polygon(50% 0,100% 100%,0 100%);background:var(--peak-off);transition:all .3s}
+.peak.on{background:var(--c);filter:drop-shadow(0 0 calc(var(--gr)*.6) var(--c))}
 .dots::after{content:'';animation:dots 1.2s steps(4,end) infinite}
 @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
-/* ---------- 棋盤 ---------- */
-#board{position:relative;padding:34px 6px}
+/* ---------- 棋盤：格子尺寸由容器大小推算（cqw/cqh），任何螢幕都塞得下 ---------- */
+#boardWrap{container-type:size;min-height:0;display:flex;justify-content:center;align-items:center;padding:6px;background:var(--board-bg);border-color:var(--board-bd);clip-path:var(--board-clip)}
+[data-theme=classic] #boardWrap{border:0;box-shadow:none;filter:none}
+#boardShadow{grid-area:board;display:none}
+[data-theme=classic] #boardShadow{display:block;background:#5a0f0f;clip-path:var(--board-clip);transform:translateY(6px);border-radius:0;opacity:.55;filter:blur(3px)}
+#board{position:relative;padding:var(--lab-t,30px) 0 var(--lab-b,30px);--ch:min(calc((100cqh - var(--lab-t,30px) - var(--lab-b,30px))/13),46px);--cw:min(calc(100cqw/11),calc(var(--ch)*1.5),60px)}
+[data-theme=classic] #board{--ch:min(calc((100cqh - var(--lab-t,30px) - var(--lab-b,30px))/13.9),46px);--cw:min(calc(100cqw/12.2),calc(var(--ch)*1.5),60px)}
 #cols{position:relative;display:flex;align-items:center;height:calc(var(--ch)*13);width:calc(var(--cw)*11)}
 .col{position:relative;width:var(--cw);display:flex;flex-direction:column-reverse}
-.col::before{content:'';position:absolute;inset:-5px 1px;border-radius:10px;border:1.5px solid transparent;transition:all .18s;pointer-events:none}
-.col.has-run::before{border-color:rgba(0,212,255,.25)}
-.col.preview::before{border-color:var(--run);box-shadow:0 0 16px var(--run),inset 0 0 16px rgba(0,212,255,.28);background:rgba(0,212,255,.06)}
-.col .lab{position:absolute;left:0;right:0;text-align:center;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(11px,1.2vw,15px);color:#64748b;transition:all .2s}
-.col .lab.t{top:-27px}.col .lab.b{bottom:-27px}
-.col.preview .lab,.col.has-run .lab{color:var(--run);text-shadow:0 0 8px var(--run)}
+.col::before{content:'';position:absolute;inset:-4px 1px;border-radius:calc(var(--cell-r) + 4px);border:max(1.5px,var(--bw)) solid transparent;transition:all .18s;pointer-events:none}
+.col.has-run::before{border-color:color-mix(in srgb,var(--hl) 35%,transparent)}
+.col.preview::before{border-color:var(--hl);box-shadow:0 0 calc(var(--gr)*1.6) var(--hl),inset 0 0 calc(var(--gr)*1.6) color-mix(in srgb,var(--hl) 28%,transparent);background:var(--hl-fill)}
+.col .lab{position:absolute;left:0;right:0;text-align:center;font-family:var(--font-disp);font-weight:700;font-size:clamp(10px,calc(var(--cw)*.36),15px);color:var(--lab);transition:all .2s}
+.col .lab.t{top:-25px}.col .lab.b{bottom:-25px}
+.col.preview .lab,.col.has-run .lab{color:var(--lab-on);text-shadow:0 0 var(--gr) var(--lab-on)}
 .cell{height:var(--ch);padding:2px}
-.cell i{display:block;width:100%;height:100%;border-radius:6px;background:rgba(15,23,42,.9);border:1px solid rgba(71,85,105,.5);transition:all .25s}
-.cell.top i{border-color:rgba(250,204,21,.55);background:linear-gradient(180deg,rgba(250,204,21,.16),rgba(15,23,42,.9))}
-.cell.target i{border-color:var(--run);background:rgba(0,212,255,.25);box-shadow:0 0 12px var(--run);animation:tgt .7s ease-in-out infinite alternate}
-@keyframes tgt{to{background:rgba(0,212,255,.45)}}
-.col.c0 .cell i{background:rgba(57,255,20,.16);border-color:rgba(57,255,20,.55);box-shadow:inset 0 0 8px rgba(57,255,20,.25)}
-.col.c1 .cell i{background:rgba(255,45,149,.16);border-color:rgba(255,45,149,.55);box-shadow:inset 0 0 8px rgba(255,45,149,.25)}
-.col.c0 .lab{color:var(--p1);text-shadow:0 0 8px var(--p1)}.col.c1 .lab{color:var(--p2);text-shadow:0 0 8px var(--p2)}
+.cell i{display:block;width:100%;height:100%;border-radius:var(--cell-r);background:var(--cell-bg);border:max(1px,calc(var(--bw) - .5px)) solid var(--cell-bd);box-shadow:var(--cell-sh);transition:all .25s}
+.cell.top i{border-color:var(--top-bd);background:var(--top-bg)}
+.cell.target i{border-color:var(--tgt);background:color-mix(in srgb,var(--tgt) 45%,var(--cell-bg));box-shadow:0 0 calc(var(--gr)*1.2) var(--tgt);animation:tgt .7s ease-in-out infinite alternate}
+[data-theme=pop] .cell.target i{border-color:var(--ink)}
+@keyframes tgt{to{background:color-mix(in srgb,var(--tgt) 85%,var(--cell-bg))}}
+.col.c0{--oc:var(--p1)}.col.c1{--oc:var(--p2)}
+.col.c0 .cell i,.col.c1 .cell i{background:color-mix(in srgb,var(--oc) var(--claim-mix),var(--cell-bg));border-color:color-mix(in srgb,var(--oc) 70%,var(--cell-bd));box-shadow:inset 0 0 calc(var(--gr)*.8) color-mix(in srgb,var(--oc) 25%,transparent)}
+[data-theme=pop] .col.c0 .cell i,[data-theme=pop] .col.c1 .cell i{border-color:var(--ink)}
+[data-theme=neon] .col.c0 .lab,[data-theme=neon] .col.c1 .lab{color:var(--oc);text-shadow:0 0 8px var(--oc)}
 .col.justclaimed{animation:claimed 1s ease-out}
-@keyframes claimed{0%{filter:brightness(3) saturate(1.5)}100%{filter:none}}
+@keyframes claimed{0%{filter:brightness(1.9) saturate(1.5)}100%{filter:none}}
 #pieces{position:absolute;inset:0;pointer-events:none}
 .piece{position:absolute;width:var(--sz);height:var(--sz);margin-left:calc(var(--sz)/-2);margin-bottom:calc(var(--sz)/-2);
   left:calc(var(--cw)*(var(--i) + .5 + var(--dx)));bottom:calc(var(--ch)*var(--s));
@@ -111,23 +203,33 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 .piece.pre,.piece.gone{opacity:0}
 .piece.landed{animation:land .38s cubic-bezier(.3,1.6,.5,1)}
 @keyframes land{0%{transform:translateY(0)}40%{transform:translateY(-38%) scale(1.12)}70%{transform:translateY(0) scale(.94,1.06)}100%{transform:none}}
-.marker{--sz:calc(var(--cw)*.36);z-index:2}
-.marker .shape{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--c) 45%);box-shadow:0 0 6px var(--c),0 0 14px var(--c)}
+.marker{--sz:calc(var(--cw)*.38);z-index:2}
 .marker.p0{--c:var(--p1)}.marker.p1{--c:var(--p2)}
-.marker.crown{--sz:calc(var(--cw)*.5)}
-.runner{--sz:calc(var(--cw)*.46);z-index:3}
-.runner .shape{width:100%;height:100%;transform:rotate(45deg) scale(.82);border-radius:22%;background:radial-gradient(circle at 40% 40%,#fff,var(--run) 55%);box-shadow:0 0 8px var(--run),0 0 20px var(--run),0 0 34px rgba(0,212,255,.6);animation:runpulse 1.2s ease-in-out infinite}
+.marker.crown{--sz:calc(var(--cw)*.52)}
+.runner{--sz:calc(var(--cw)*.48);z-index:3;--c:var(--run)}
+.marker .shape{width:100%;height:100%;border-radius:50%}
+.runner .shape{width:100%;height:100%;transform:rotate(45deg) scale(.82);border-radius:22%}
+/* 棋子外觀：霓虹＝發光體／原版＝木頭棋子／POP＝粗黑邊色塊 */
+[data-theme=neon] .marker .shape{background:radial-gradient(circle at 35% 30%,#fff,var(--c) 45%);box-shadow:0 0 6px var(--c),0 0 14px var(--c)}
+[data-theme=neon] .runner .shape{background:radial-gradient(circle at 40% 40%,#fff,var(--run) 55%);box-shadow:0 0 8px var(--run),0 0 20px var(--run),0 0 34px rgba(0,212,255,.6);animation:runpulse 1.2s ease-in-out infinite}
 @keyframes runpulse{50%{box-shadow:0 0 5px var(--run),0 0 12px var(--run)}}
+[data-theme=classic] .piece .shape{background:radial-gradient(circle at 35% 28%,color-mix(in srgb,var(--c) 55%,#fff),var(--c) 58%,color-mix(in srgb,var(--c) 70%,#000));border:1.5px solid color-mix(in srgb,var(--c) 45%,#000);box-shadow:0 2px 3px rgba(40,20,0,.45)}
+[data-theme=classic] .runner{--sz:calc(var(--cw)*.54)}
+[data-theme=classic] .runner .shape{background:radial-gradient(circle at 35% 28%,#fff,#f3ecd9 60%,#cfc4a8);border:2px solid #2b2119;box-shadow:0 2px 4px rgba(20,10,0,.6);animation:runbob 1.4s ease-in-out infinite}
+@keyframes runbob{50%{box-shadow:0 2px 4px rgba(20,10,0,.6),0 0 0 3px rgba(43,33,25,.35)}}
+[data-theme=pop] .piece .shape{background:var(--c);border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
 .piece.busting{animation:bustfx 1.25s ease-in forwards;transition:none}
-.piece.busting .shape{background:radial-gradient(circle at 40% 40%,#fff,var(--danger) 50%);box-shadow:0 0 10px var(--danger),0 0 28px var(--danger),0 0 50px var(--danger);animation:none}
-@keyframes bustfx{0%{opacity:1;transform:scale(1)}12%{transform:scale(1.5);filter:brightness(2)}24%{opacity:.35;transform:scale(1)}36%{opacity:1;transform:scale(1.4);filter:brightness(2)}48%{opacity:.35}60%{opacity:1;transform:scale(1.25)}100%{opacity:0;transform:scale(.2) translateY(24px);filter:blur(3px)}}
+.piece.busting .shape{background:var(--danger)!important;box-shadow:0 0 10px var(--danger),0 0 28px var(--danger)!important;animation:none!important}
+@keyframes bustfx{0%{opacity:1;transform:scale(1)}12%{transform:scale(1.5);filter:brightness(1.8)}24%{opacity:.35;transform:scale(1)}36%{opacity:1;transform:scale(1.4);filter:brightness(1.8)}48%{opacity:.35}60%{opacity:1;transform:scale(1.25)}100%{opacity:0;transform:scale(.2) translateY(24px);filter:blur(3px)}}
 .shake{animation:shake .55s cubic-bezier(.36,.07,.19,.97)}
 @keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-7px,2px) rotate(-.3deg)}40%,60%{transform:translate(7px,-1px) rotate(.3deg)}}
-#vignette{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;box-shadow:inset 0 0 160px 40px rgba(255,59,59,.55)}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;box-shadow:inset 0 0 160px 40px color-mix(in srgb,var(--danger) 55%,transparent)}
 #vignette.on{animation:vig 1.2s ease-out}
 @keyframes vig{0%{opacity:0}12%{opacity:1}30%{opacity:.3}45%{opacity:.9}100%{opacity:0}}
 #flash{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5}
-#flash span{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(34px,7vw,76px);letter-spacing:.08em;opacity:0;color:var(--fc);text-shadow:0 0 12px var(--fc),0 0 40px var(--fc)}
+#flash span{font-family:var(--font-disp);font-weight:900;font-size:clamp(30px,7vw,72px);letter-spacing:.06em;opacity:0;color:var(--fc);text-shadow:0 0 12px var(--fc),0 0 40px var(--fc);white-space:nowrap}
+[data-theme=classic] #flash span{color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45),0 0 18px rgba(0,0,0,.5);-webkit-text-stroke:1px rgba(0,0,0,.35)}
+[data-theme=pop] #flash span{color:var(--fc);text-shadow:3px 3px 0 var(--ink);-webkit-text-stroke:2px var(--ink);paint-order:stroke fill}
 #flash.on span{animation:flash 1.3s ease-out}
 @keyframes flash{0%{opacity:0;transform:scale(2.2)}18%{opacity:1;transform:scale(1)}70%{opacity:1}100%{opacity:0;transform:scale(.92) translateY(-12px)}}
 /* ---------- 骰子 ---------- */
@@ -141,49 +243,77 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 @keyframes spin{from{transform:rotateX(var(--sx)) rotateY(var(--sy)) rotateZ(var(--sz))}to{transform:rotateX(var(--ex)) rotateY(var(--ey)) rotateZ(0deg)}}
 .cube.tumble{animation:tumble 1.3s linear infinite}
 @keyframes tumble{from{transform:rotateX(0) rotateY(0) rotateZ(0)}to{transform:rotateX(360deg) rotateY(720deg) rotateZ(360deg)}}
-.face{position:absolute;inset:0;border-radius:12px;background:linear-gradient(145deg,#16213d,#060b19);border:1.5px solid var(--dc,#475569);
-  box-shadow:inset 0 0 12px rgba(0,212,255,.18);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:16%;transition:border-color .2s,box-shadow .2s}
-.face b{width:72%;height:72%;margin:auto;border-radius:50%;background:var(--dp,#e2e8f0);box-shadow:0 0 6px var(--dp,#e2e8f0);visibility:hidden}
+.face{position:absolute;inset:0;border-radius:var(--die-r);background:var(--die-bg);border:max(1.5px,var(--bw)) solid var(--dc,var(--die-bd));
+  box-shadow:var(--die-sh);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:16%;transition:border-color .2s,box-shadow .2s}
+.face b{width:72%;height:72%;margin:auto;border-radius:50%;background:var(--dp,var(--die-pip));box-shadow:0 0 calc(var(--gr)*.6) var(--dp,var(--die-pip));visibility:hidden}
 .face b.on{visibility:visible}
 .f1{transform:translateZ(calc(var(--ds)/2))}.f6{transform:rotateY(180deg) translateZ(calc(var(--ds)/2))}
 .f2{transform:rotateY(90deg) translateZ(calc(var(--ds)/2))}.f5{transform:rotateY(-90deg) translateZ(calc(var(--ds)/2))}
 .f3{transform:rotateX(90deg) translateZ(calc(var(--ds)/2))}.f4{transform:rotateX(-90deg) translateZ(calc(var(--ds)/2))}
-.die.pa{--dc:var(--pa);--dp:var(--pa)}.die.pb{--dc:var(--pb);--dp:var(--pb)}
-.die.pa .face{box-shadow:0 0 14px var(--pa),inset 0 0 12px rgba(0,212,255,.3)}
-.die.pb .face{box-shadow:0 0 14px var(--pb),inset 0 0 12px rgba(192,132,252,.3)}
+.die.pa{--dc:var(--pa);--dp:var(--pa-pip)}.die.pb{--dc:var(--pb);--dp:var(--pb-pip)}
+.die.pa .face,.die.pb .face{box-shadow:0 0 calc(var(--gr)*1.4) var(--dc),var(--die-sh)}
+[data-theme=classic] .die.pa .face,[data-theme=classic] .die.pb .face{border-width:2.5px}
+[data-theme=pop] .die.pa .face{background:#FFE0EE}[data-theme=pop] .die.pb .face{background:#DDF0FF}
 /* ---------- 組合卡片 ---------- */
 #combos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-height:92px}
-.combo-empty{grid-column:1/-1;display:grid;place-items:center;border:1px dashed rgba(100,116,139,.35);border-radius:12px;color:#64748b;font-size:.8rem}
-.combo{border-radius:12px;padding:8px 4px 6px;text-align:center;background:rgba(2,6,23,.75);border:1px solid rgba(0,212,255,.35);transition:all .18s;animation:cardin .35s both}
+.combo-empty{grid-column:1/-1;display:grid;place-items:center;border:max(1px,calc(var(--bw) - 1px)) dashed var(--ink-faint);border-radius:12px;color:var(--ink-faint);font-size:.8rem}
+.combo{border-radius:12px;padding:8px 4px 6px;text-align:center;background:var(--card-bg);border:max(1px,var(--bw)) solid var(--card-bd);box-shadow:var(--hard);transition:all .18s;animation:cardin .35s both}
 .combo:nth-child(2){animation-delay:.07s}.combo:nth-child(3){animation-delay:.14s}
 @keyframes cardin{from{opacity:0;transform:translateY(12px) scale(.95)}}
 .combo[data-play]{cursor:pointer}
-.live .combo[data-play]:hover,.combo.ai-pick{transform:translateY(-4px);border-color:var(--run);box-shadow:0 0 18px rgba(0,212,255,.55),inset 0 0 14px rgba(0,212,255,.15)}
-.combo.disabled{opacity:.35;border-color:rgba(100,116,139,.3)}
+.live .combo[data-play]:hover,.combo.ai-pick{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 0 calc(var(--gr)*1.8) color-mix(in srgb,var(--accent) 55%,transparent),0 0 0 1.5px var(--accent),var(--hard)}
+[data-theme=pop] .live .combo[data-play]:hover,[data-theme=pop] .combo.ai-pick{background:#FFD447;border-color:var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.combo.disabled{opacity:.4}
 .combo .row{display:flex;align-items:flex-start;justify-content:center;gap:4px}
-.combo .amp{color:#475569;font-weight:700;padding-top:6px}
-.num{display:flex;flex-direction:column;align-items:center;min-width:42px;border-radius:9px;padding:2px 4px;border:1px solid transparent;transition:all .15s}
-.num b{font-family:'Orbitron',sans-serif;font-size:1.45rem;line-height:1.25}
+.combo .amp{color:var(--ink-faint);font-weight:700;padding-top:6px}
+.num{display:flex;flex-direction:column;align-items:center;min-width:42px;border-radius:9px;padding:2px 4px;border:max(1px,calc(var(--bw) - 1px)) solid transparent;transition:all .15s}
+.num b{font-family:var(--font-disp);font-size:1.45rem;line-height:1.25}
 .num small{font-size:.62rem;line-height:1.1;white-space:nowrap}
-.num.ok b{color:#fff;text-shadow:0 0 10px var(--run)}.num.ok small{color:var(--run)}
-.num.bad b{color:#475569;text-decoration:line-through}.num.bad small{color:#f87171}
-.combo.choose .num{cursor:pointer;border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.06)}
-.live .combo.choose .num:hover,.num.ai-pick{border-color:var(--run);background:rgba(0,212,255,.2);box-shadow:0 0 12px var(--run)}
-.combo .sub{font-size:.62rem;color:#94a3b8;margin-top:4px;line-height:1.2}
-.rpip{width:13px;height:13px;transform:rotate(45deg);border-radius:3px;background:#1e293b;border:1px solid #334155;transition:all .3s}
-.rpip.on{background:var(--run);border-color:var(--run);box-shadow:0 0 10px var(--run)}
+.num.ok b{color:var(--num-ok);text-shadow:0 0 var(--gr) var(--accent)}.num.ok small{color:var(--accent-ink)}
+.num.bad b{color:var(--ink-faint);text-decoration:line-through}.num.bad small{color:var(--danger)}
+.combo.choose .num{cursor:pointer;border-color:color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.live .combo.choose .num:hover,.num.ai-pick{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:0 0 var(--gr) var(--accent)}
+.combo .sub{font-size:.62rem;color:var(--ink-dim);margin-top:4px;line-height:1.2}
+.rpip{width:13px;height:13px;transform:rotate(45deg);border-radius:3px;background:var(--peak-off);border:max(1px,calc(var(--bw) - 1px)) solid var(--ink-faint);transition:all .3s}
+.rpip.on{background:var(--run);border-color:color-mix(in srgb,var(--run) 60%,var(--ink));box-shadow:0 0 var(--gr) var(--run)}
+[data-theme=classic] .rpip.on{border-color:#4a3a28}[data-theme=pop] .rpip.on{border-color:var(--ink)}
 #gaugeBar{height:100%;border-radius:99px;transition:width .4s,background .4s}
+/* ---------- 手機：壓縮控制區，把高度讓給棋盤 ---------- */
+@media (max-width:1023px){
+  :root{--ds:46px}
+  #dice{gap:12px;padding:8px 0 6px}
+  #ctrl{padding:10px}
+  #combos{min-height:72px}.combo{padding:5px 4px 4px}
+  .btn{padding:.65rem .8rem}
+  .pcard{padding:5px 8px}.avatar{width:30px;height:30px;font-size:15px}.pmsg{display:none}
+  #boardWrap{--lab-t:24px;--lab-b:8px;padding:4px}.col .lab.b{display:none}.col .lab.t{top:-21px}
+  #riskRow{margin-bottom:8px}#status{font-size:.8rem}#ctrl .mt-4{margin-top:10px}
+  .num b{font-size:1.25rem}
+  .sel-sm{max-width:104px}#bgm .eq{display:none}#bgm{gap:6px;padding:5px 8px}
+}
+/* ---------- 新手教學：四片擋板圍出洞口（洞內可點），提示卡跟著洞口走 ---------- */
+.tut-b{position:fixed;z-index:90;background:rgba(10,8,20,.72);display:none}
+#tutRing{position:fixed;z-index:91;display:none;pointer-events:none;border-radius:14px;border:2.5px solid var(--tut-ring,#fff);box-shadow:0 0 0 4px rgba(255,255,255,.18),0 0 calc(var(--gr)*2) var(--accent);transition:all .28s cubic-bezier(.4,0,.2,1)}
+#tutRing.pulse{animation:tutpulse 1.1s ease-in-out infinite}
+@keyframes tutpulse{50%{box-shadow:0 0 0 9px rgba(255,255,255,.28),0 0 calc(var(--gr)*2) var(--accent)}}
+#tutTip{position:fixed;z-index:95;display:none;width:min(340px,calc(100vw - 24px));padding:14px 16px;transition:top .28s,left .28s}
+#tutTip h3{font-family:var(--font-disp);font-weight:800;font-size:1.02rem;margin-bottom:4px;color:var(--accent-ink)}
+#tutTip p{font-size:.84rem;line-height:1.6}
+.tut-on .tut-b,.tut-on #tutRing,.tut-on #tutTip{display:block}
+#btnTut.nudge{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(-3px);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent),var(--hard)}}
 /* ---------- 遮罩 ---------- */
-.overlay{position:fixed;inset:0;z-index:80;display:none;place-items:center;background:rgba(2,6,23,.94);backdrop-filter:blur(10px);padding:20px}
+.overlay{position:fixed;inset:0;z-index:80;display:none;place-items:center;background:var(--ov-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:20px}
 .overlay.on{display:grid;animation:ovin .3s}
 @keyframes ovin{from{opacity:0}}
 .pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes pop{from{opacity:0;transform:scale(.8)}}
-@media (prefers-reduced-motion:reduce){.shake{animation:none}.neon-title{animation:none}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}.title{animation:none}}
 </style>
 </head>
 <body>
 <div id="bg"></div>
+<div id="topfade"></div>
 <div id="vignette"></div>
 
 <!-- ===== BGM 控制 ===== -->
@@ -194,18 +324,18 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
   </button>
   <div class="eq" id="eq"><i></i><i></i><i></i></div>
   <select id="bgmTrack" class="text-xs sel-sm" aria-label="選擇音樂"></select>
-  <input id="bgmVol" type="range" min="0" max="100" value="60" class="w-16 sm:w-20" aria-label="音量">
-  <span id="bgmSrc" class="hidden sm:inline text-[10px] text-slate-500 w-8"></span>
+  <input id="bgmVol" type="range" min="0" max="100" value="60" class="w-14 sm:w-20" aria-label="音量">
+  <span id="bgmSrc" class="hidden sm:inline text-[10px] faint w-8"></span>
 </div>
 <audio id="bgmAudio" preload="none" loop></audio>
 
 <!-- ===== 大廳 ===== -->
-<main id="lobby" class="min-h-full px-4 pt-20 pb-10">
+<main id="lobby" class="min-h-full">
   <div class="mx-auto max-w-4xl">
     <div class="text-center mb-8">
-      <h1 class="orb neon-title text-5xl sm:text-7xl font-black tracking-wider">CAN'T STOP</h1>
-      <p class="mt-3 text-lg tracking-[.5em] text-slate-300">欲 罷 不 能</p>
-      <p class="mt-1 text-xs text-slate-500">再擲一次？還是見好就收？——搶先攻下 3 座山頭的人獲勝</p>
+      <h1 class="title text-5xl sm:text-7xl font-black tracking-wider">CAN'T STOP</h1>
+      <p class="mt-4 text-lg tracking-[.5em]">欲 罷 不 能</p>
+      <p class="mt-1 text-xs dim">再擲一次？還是見好就收？——搶先攻下 3 座山頭的人獲勝</p>
     </div>
 
     <div class="grid md:grid-cols-2 gap-4">
@@ -216,20 +346,25 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
           <button data-mode="local">👥 雙人本地對戰</button>
         </div>
         <div id="aiBox">
-          <label class="text-xs text-slate-400 block mb-1">AI 對手難度</label>
+          <label class="text-xs dim block mb-1">AI 對手難度</label>
           <select id="aiLevel" class="w-full"></select>
-          <p id="aiDesc" class="text-xs text-slate-400 mt-2 min-h-[2.5em]"></p>
+          <p id="aiDesc" class="text-xs dim mt-2 min-h-[2.5em]"></p>
         </div>
-        <div id="localBox" class="hidden text-xs text-slate-400 leading-relaxed">
+        <div id="localBox" class="hidden text-xs dim leading-relaxed">
           Pass &amp; Play：同一台裝置輪流操作，回合交替時會跳出全螢幕提示再交給下一位。
         </div>
+        <div>
+          <label class="text-xs dim block mb-1">畫面風格</label>
+          <div class="seg three" id="themeSeg"></div>
+        </div>
         <button id="btnStart" class="btn btn-start w-full orb text-lg">START ▶</button>
-        <details class="text-xs text-slate-400">
-          <summary class="cursor-pointer text-slate-300">規則速覽</summary>
+        <button id="btnTut" class="btn btn-ghost w-full text-sm">🎓 新手教學（約 1 分鐘，邊玩邊學）</button>
+        <details class="text-xs dim">
+          <summary class="cursor-pointer" style="color:var(--ink)">規則速覽</summary>
           <ul class="list-disc pl-5 mt-2 space-y-1">
-            <li>擲 4 顆骰子，兩兩分組得到 2 個和（2–12），對應賽道的<span class="t-run">暫時棋子</span>各前進 1 步。</li>
+            <li>擲 4 顆骰子，兩兩分組得到 2 個和（2–12），對應賽道的<b>暫時棋子</b>各前進 1 步。</li>
             <li>每回合最多 3 顆暫時棋子；可一直擲，也可隨時「收手」把進度存成自己的棋子。</li>
-            <li>擲出的分組全都走不了 = <span class="text-red-400">爆掉</span>，本回合進度全部歸零。</li>
+            <li>擲出的分組全都走不了 = <span class="t-danger">爆掉</span>，本回合進度全部歸零。</li>
             <li>收手時棋子在頂端即封頂該賽道；先封頂 3 條者獲勝。</li>
           </ul>
         </details>
@@ -242,35 +377,37 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="statGrid"></div>
         <div class="mt-3">
-          <div class="flex justify-between text-[11px] text-slate-400 mb-1"><span class="t-p1">玩家 1</span><span id="wrTxt">—</span><span class="t-p2">玩家 2 / AI</span></div>
-          <div class="h-2 rounded-full overflow-hidden flex bg-slate-800"><div id="wr1" style="width:50%;background:var(--p1);box-shadow:0 0 10px var(--p1)"></div><div id="wr2" style="width:50%;background:var(--p2)"></div></div>
+          <div class="flex justify-between text-[11px] dim mb-1"><span class="t-p1">玩家 1</span><span id="wrTxt">—</span><span class="t-p2">玩家 2 / AI</span></div>
+          <div class="h-2 rounded-full overflow-hidden flex bar"><div id="wr1" style="width:50%;background:var(--p1)"></div><div id="wr2" style="width:50%;background:var(--p2)"></div></div>
         </div>
       </section>
     </div>
-    <p class="text-center text-[10px] text-slate-600 mt-6">Music: Kevin MacLeod (incompetech.com) — Licensed under CC BY 4.0 · 串流失敗時自動改用內建合成器</p>
+    <p class="text-center text-[10px] faint mt-6">Music: Kevin MacLeod (incompetech.com) — Licensed under CC BY 4.0 · 串流失敗時自動改用內建合成器</p>
   </div>
 </main>
 
 <!-- ===== 遊戲 ===== -->
-<main id="game" class="hidden min-h-full px-2 sm:px-4 pt-16 pb-6">
-  <div class="fixed top-[10px] left-[10px] z-50 flex items-center gap-3">
+<main id="game" class="hidden">
+  <div id="topLeft">
     <button id="btnBack" class="btn btn-ghost btn-md text-xs">← 大廳</button>
-    <span class="orb hidden md:inline text-sm tracking-widest text-slate-400">CAN'T STOP</span>
+    <button id="btnTheme" class="btn btn-ghost btn-md" title="切換畫面風格" aria-label="切換畫面風格">🎨</button>
+    <span class="orb hidden md:inline text-sm tracking-widest dim">CAN'T STOP</span>
   </div>
-  <div id="gameGrid" class="mx-auto max-w-6xl">
+  <div id="gameGrid">
     <div id="players" class="grid grid-cols-2 gap-2"></div>
 
-    <div id="boardWrap" class="panel p-2 sm:p-4 flex justify-center items-center">
+    <div id="boardShadow"></div>
+    <div id="boardWrap" class="panel">
       <div id="board"><div id="cols"><div id="pieces"></div></div><div id="flash"><span></span></div></div>
     </div>
 
     <div id="ctrl" class="panel p-3 sm:p-4">
       <div id="status" class="text-center text-sm font-medium min-h-[1.5em]"></div>
       <div id="dice"></div>
-      <div class="flex items-center justify-between gap-3 mb-3 text-xs">
-        <div class="flex items-center gap-2"><span class="text-slate-400">暫時棋子</span><span id="rpips" class="flex gap-2 px-1"></span><span id="rleft" class="orb t-run"></span></div>
-        <div class="flex items-center gap-2 flex-1 max-w-[190px]"><span class="text-slate-400 whitespace-nowrap">爆掉機率</span>
-          <div class="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden"><div id="gaugeBar" style="width:0"></div></div>
+      <div id="riskRow" class="flex items-center justify-between gap-3 mb-3 text-xs">
+        <div class="flex items-center gap-2"><span class="dim">暫時棋子</span><span id="rpips" class="flex gap-2 px-1"></span><span id="rleft" class="orb t-run"></span></div>
+        <div class="flex items-center gap-2 flex-1 max-w-[190px]"><span class="dim whitespace-nowrap">爆掉機率</span>
+          <div class="flex-1 h-2 rounded-full overflow-hidden bar"><div id="gaugeBar" style="width:0"></div></div>
           <span id="gaugeTxt" class="orb w-9 text-right">0%</span></div>
       </div>
       <div id="combos"></div>
@@ -284,17 +421,28 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radiu
 
 <!-- ===== 遮罩 ===== -->
 <div id="passOv" class="overlay"><div class="text-center pop">
-  <p id="passSub" class="text-slate-400 mb-4"></p>
+  <p id="passSub" class="dim mb-4"></p>
   <h2 id="passTitle" class="orb text-4xl sm:text-6xl font-black mb-3"></h2>
-  <p class="text-slate-400 mb-8">請將裝置交給下一位玩家</p>
+  <p class="dim mb-8">請將裝置交給下一位玩家</p>
   <button id="passOk" class="btn btn-start orb px-10">READY ▶</button>
 </div></div>
 <div id="winOv" class="overlay"><div class="text-center pop max-w-md">
   <div class="text-6xl mb-3">🏆</div>
   <h2 id="winTitle" class="orb text-4xl sm:text-5xl font-black mb-2"></h2>
-  <p id="winSub" class="text-slate-400 mb-8"></p>
+  <p id="winSub" class="dim mb-8"></p>
   <div class="grid grid-cols-2 gap-3"><button id="btnAgain" class="btn btn-start">再來一局</button><button id="btnLobby" class="btn btn-ghost">回大廳</button></div>
 </div></div>
+
+<!-- ===== 新手教學 ===== -->
+<div class="tut-b" id="tutT"></div><div class="tut-b" id="tutB"></div><div class="tut-b" id="tutL"></div><div class="tut-b" id="tutR"></div>
+<div id="tutRing"></div>
+<div id="tutTip" class="panel">
+  <h3 id="tutTitle"></h3><p id="tutText"></p>
+  <div class="flex items-center justify-between mt-3">
+    <span id="tutStep" class="orb text-[11px] faint"></span>
+    <span class="flex gap-2"><button id="tutSkip" class="btn btn-ghost btn-sm text-xs">跳過</button><button id="tutNext" class="btn btn-roll btn-sm text-xs">下一步 ▶</button></span>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -452,7 +600,7 @@ if(typeof document!=='undefined'){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const store={get(k,d){try{return{...d,...JSON.parse(localStorage.getItem(k)||'{}')};}catch(e){return{...d};}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
-const prefs=store.get('cantstop.prefs.v1',{mode:'ai',level:3,vol:60,track:0});
+const prefs=store.get('cantstop.prefs.v1',{mode:'ai',level:3,vol:60,track:0,theme:'classic',tutDone:false});
 
 const INC='https://incompetech.com/music/royalty-free/mp3-royaltyfree/';
 const TRACKS=[
@@ -569,8 +717,8 @@ const BGM={
 const STAT_KEY='cantstop.stats.v1',STAT_DEF={games:0,w0:0,w1:0,best:0,cur:0,b0:0,b1:0};
 let stats=store.get(STAT_KEY,STAT_DEF);
 function renderStats(){
-  const tiles=[['總遊玩場數',stats.games,'--run',''],['玩家 1 勝場',stats.w0,'--p1',''],['玩家 2 / AI 勝場',stats.w1,'--p2',''],
-    ['最高連勝紀錄',stats.best,'--p1',`目前連勝 ${stats.cur}`],['爆掉 Bust 次數',stats.b0+stats.b1,'--danger',`P1 ${stats.b0} · P2/AI ${stats.b1}`]];
+  const tiles=[['總遊玩場數',stats.games,'--accent-ink',''],['玩家 1 勝場',stats.w0,'--p1-ink',''],['玩家 2 / AI 勝場',stats.w1,'--p2-ink',''],
+    ['最高連勝紀錄',stats.best,'--p1-ink',`目前連勝 ${stats.cur}`],['爆掉 Bust 次數',stats.b0+stats.b1,'--danger',`P1 ${stats.b0} · P2/AI ${stats.b1}`]];
   $('#statGrid').innerHTML=tiles.map(([l,v,c,s],i)=>`<div class="stat ${i===4?'col-span-2 sm:col-span-2':''}" style="--c:var(${c})"><b>${v}</b><span>${l}</span>${s?`<small>${s}</small>`:''}</div>`).join('');
   const tot=stats.w0+stats.w1,r=tot?stats.w0/tot*100:50;
   $('#wr1').style.width=r+'%';$('#wr2').style.width=(100-r)+'%';
@@ -657,9 +805,9 @@ function renderPlayers(){
     const msg=act?(ai?(G.aiMsg||'AI 回合'):'行動中'):'等待中';
     return`<div class="pcard p${p} ${act?'active':''}" style="--c:var(--p${p+1})"><div class="flex items-center gap-2">
       <div class="avatar ${ai&&act?'breath':''}">${ai?'🤖':p?'🧗‍♀️':'🧗'}</div>
-      <div class="min-w-0 flex-1"><div class="font-bold text-sm t-p${p+1} truncate">${pname(p)} <span class="text-[10px] text-slate-500 font-normal">${sub}</span></div>
-      <div class="flex items-center gap-1 mt-1">${[0,1,2].map(i=>`<span class="peak ${i<n?'on':''}"></span>`).join('')}<span class="orb text-xs text-slate-400 ml-1">${n}/3</span></div></div></div>
-      <div class="text-[11px] mt-1.5 truncate ${act?'text-slate-200':'text-slate-500'} ${ai&&act&&G.thinking?'dots':''}">${msg}</div></div>`;
+      <div class="min-w-0 flex-1"><div class="font-bold text-sm t-p${p+1} truncate">${pname(p)} <span class="text-[10px] faint font-normal">${sub}</span></div>
+      <div class="flex items-center gap-1 mt-1">${[0,1,2].map(i=>`<span class="peak ${i<n?'on':''}"></span>`).join('')}<span class="orb text-xs dim ml-1">${n}/3</span></div></div></div>
+      <div class="pmsg text-[11px] mt-1.5 truncate ${act?'':'faint'} ${ai&&act&&G.thinking?'dots':''}">${msg}</div></div>`;
   }).join('');
 }
 function renderCtrl(){
@@ -671,11 +819,11 @@ function renderCtrl(){
   $('#rleft').textContent=free;
   const p=Rules.bustProb(st),pct=Math.round(p*100),bar=$('#gaugeBar');
   bar.style.width=Math.max(pct,2)+'%';
-  const col=p<.25?'var(--p1)':p<.5?'#facc15':'var(--danger)';bar.style.background=col;bar.style.boxShadow=`0 0 8px ${col}`;
+  const col=p<.25?'var(--ok)':p<.5?'var(--warn)':'var(--danger)';bar.style.background=col;bar.style.boxShadow=`0 0 var(--gr) ${col}`;
   $('#gaugeTxt').textContent=pct+'%';$('#gaugeTxt').style.color=col;
   const who=`<span class="t-p${st.current+1}">${pname(st.current)}</span>`;
   const txt={start:`${who}：請擲骰`,rolling:'擲骰中…',choose:isAI()?`${who} 正在思考分組`:`${who}：選擇一組分組`,
-    decide:isAI()?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="text-red-400 font-bold">💥 爆掉了！本回合進度歸零</span>',
+    decide:isAI()?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="t-danger font-bold">💥 爆掉了！本回合進度歸零</span>',
     bank:`${who} 收手，進度已保存`,over:'遊戲結束'}[st.phase]||'';
   $('#status').innerHTML=isAI()&&G.aiMsg&&st.phase!=='bust'?`<span class="t-p2 ${G.thinking?'dots':''}">${G.aiMsg}</span>`:txt;
 }
@@ -706,25 +854,25 @@ function comboTarget(e){const t=e.target.closest('[data-play]');if(!t)return nul
 function flash(text,color){const f=$('#flash');f.style.setProperty('--fc',color);f.querySelector('span').textContent=text;f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
 
 /* ---- 回合流程 ---- */
-function startGame(){
-  G.token++;G.aiMsg='';G.thinking=false;
-  G.st=Rules.newState(prefs.mode,prefs.level);
+function startGame(tut){
+  G.token++;G.aiMsg='';G.thinking=false;G.forceDice=null;
+  G.st=Rules.newState(tut===true?'local':prefs.mode,prefs.level);
   $('#lobby').classList.add('hidden');$('#game').classList.remove('hidden');$$('.overlay').forEach(o=>o.classList.remove('on'));
   buildBoard();buildDice();window.scrollTo(0,0);beginTurn();
 }
-function toLobby(){G.token++;setTumble(false);$$('.overlay').forEach(o=>o.classList.remove('on'));$('#game').classList.add('hidden');$('#lobby').classList.remove('hidden');renderStats();}
+function toLobby(){Tut.stop();G.token++;setTumble(false);$$('.overlay').forEach(o=>o.classList.remove('on'));$('#game').classList.add('hidden');$('#lobby').classList.remove('hidden');renderStats();}
 function beginTurn(){G.st.phase='start';G.st.options=[];G.aiMsg='';renderAll();if(isAI())aiTurn(G.token);}
 
 async function doRoll(tok){
   const st=G.st;st.phase='rolling';st.options=[];clearPreview();renderAll();
-  st.dice=Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
+  st.dice=(G.forceDice&&G.forceDice.shift())||Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
   await sleep(650);if(tok!==G.token)return false;
   st.options=Rules.options(st,st.dice);
   if(!st.options.some(o=>o.plays.length)){st.phase='choose';renderAll();await sleep(500);if(tok!==G.token)return false;await doBust(tok);return false;}
-  st.phase='choose';renderAll();return true;
+  st.phase='choose';renderAll();Tut.event('rolled');return true;
 }
 function doChoose(i,k){
-  const st=G.st;clearPreview();Rules.applyPlay(st,st.options[i].plays[k]);st.phase='decide';SFX.pick();SFX.step();renderAll();
+  const st=G.st;clearPreview();Rules.applyPlay(st,st.options[i].plays[k]);st.phase='decide';SFX.pick();SFX.step();renderAll();Tut.event('picked');
 }
 async function doBust(tok){
   const st=G.st;st.phase='bust';G.aiMsg='';G.thinking=false;
@@ -744,6 +892,7 @@ async function doStop(tok){
     res.claimedNow.forEach(c=>{const el=colEl(c);el.classList.remove('justclaimed');void el.offsetWidth;el.classList.add('justclaimed');});}
   else SFX.bank();
   await sleep(res.claimedNow.length?1400:800);if(tok!==G.token)return;
+  if(Tut.on){Tut.event('stopped');return;}
   if(res.winner!==null)return endGame(res.winner);
   switchTurn('bank');
 }
@@ -800,7 +949,80 @@ combos.addEventListener('focusin',e=>{if(!canPick())return;const t=comboTarget(e
 combos.addEventListener('click',e=>{if(!canPick())return;const t=comboTarget(e);if(t)doChoose(t.i,t.k);});
 combos.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&canPick()){const t=comboTarget(e);if(t){e.preventDefault();doChoose(t.i,t.k);}}});
 $('#passOk').onclick=()=>{$('#passOv').classList.remove('on');beginTurn();};
-$('#btnAgain').onclick=startGame;$('#btnLobby').onclick=toLobby;$('#btnBack').onclick=toLobby;$('#btnStart').onclick=startGame;
+$('#btnAgain').onclick=()=>startGame();$('#btnLobby').onclick=toLobby;$('#btnBack').onclick=toLobby;$('#btnStart').onclick=()=>startGame();
+
+/* ---- 畫面風格（三主題；皮膚全在 CSS 的 [data-theme] token 區塊） ---- */
+const THEMES=[
+  {id:'classic',name:'原版桌遊',bar:'#eadbbc',sw:['#b3261e','#fff8e4','#23934f']},
+  {id:'neon',name:'霓虹科技',bar:'#020617',sw:['#020617','#00d4ff','#ff2d95']},
+  {id:'pop',name:'POP 普普',bar:'#FFF1DC',sw:['#FFD447','#FF6FAE','#8EC9FF']}
+];
+function applyTheme(id){
+  const t=THEMES.find(x=>x.id===id)||THEMES[0];
+  document.documentElement.dataset.theme=t.id;prefs.theme=t.id;store.set('cantstop.prefs.v1',prefs);
+  document.querySelector('meta[name=theme-color]').content=t.bar;
+  $$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.theme===t.id));
+  $('#btnTheme').title=`切換畫面風格（目前：${t.name}）`;
+}
+$('#themeSeg').innerHTML=THEMES.map(t=>`<button data-theme="${t.id}"><span class="sw">${t.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</span>${t.name}</button>`).join('');
+$('#themeSeg').onclick=e=>{const b=e.target.closest('button');if(b)applyTheme(b.dataset.theme);};
+$('#btnTheme').onclick=()=>{const i=THEMES.findIndex(t=>t.id===prefs.theme);applyTheme(THEMES[(i+1)%THEMES.length].id);};
+
+/* ---- 新手教學：實際玩一回合（骰點固定），四片擋板圍出洞口，只有洞內可以點 ---- */
+const Tut={
+  on:false,i:0,timer:null,
+  steps:[
+    {sel:'#boardWrap',title:'這是棋盤',text:'11 條賽道，編號 2–12，就是「兩顆骰子的點數和」。中間的 7 最長（13 格）但最容易擲到；兩側的 2、12 只有 3 格，卻很難擲出來。'},
+    {sel:'#players',title:'目標：搶下 3 條賽道',text:'把棋子推到賽道最頂端再收手，就「封頂」那條賽道。先封頂 3 條的人獲勝——每封頂一條，這裡的三角形會亮一顆。'},
+    {sel:'#btnRoll',wait:'rolled',title:'先擲骰',text:'按下「擲骰」，一次擲出 4 顆骰子。'},
+    {sel:'#dice',sel2:'#combos',wait:'picked',title:'兩兩分組',text:'4 顆骰子分成兩組，每組相加就是要前進的賽道編號。滑鼠移上去會預覽落點（手機直接點）。挑一組你喜歡的！'},
+    {sel:'#cols',title:'暫時棋子',text:'剛放上去的是「暫時棋子」，代表這回合的進度——還不算你的。每回合最多只能動用 3 顆，用完就只能推進這 3 條賽道。'},
+    {sel:'#riskRow',title:'爆掉機率',text:'如果擲出來的分組「全都走不了」，就會爆掉：這回合的暫時進度全部歸零。這條量表顯示下一擲爆掉的機率，3 顆棋子都用上之後會明顯升高。'},
+    {sel:'#btnRoll',wait:'rolled',title:'貪心一下',text:'現在機率還很低，再擲一次！'},
+    {sel:'#dice',sel2:'#combos',wait:'picked',title:'再選一組',text:'小技巧：優先選能「推進現有暫時棋子」的組合，才不會多佔一顆棋子、把自己逼向爆掉。'},
+    {sel:'#btnStop',wait:'stopped',title:'見好就收',text:'按「收手」，暫時棋子的進度就會存成你自己的棋子，然後換對手。不收手繼續擲，就是拿這回合的進度跟爆掉機率對賭。'},
+    {sel:'#boardWrap',title:'進度保存了！',text:'彩色棋子是你已保存的進度，下回合會從這裡繼續往上爬。規則就這些——再擲一次，還是見好就收？',last:true}
+  ],
+  start(){
+    startGame(true);G.forceDice=[[1,3,4,6],[6,4,1,3]];   // 兩擲的分組相同（4&10／5&9／7&7），第一擲不管選哪組，第二擲都有「推進現有棋子」的選項
+    this.on=true;this.i=0;document.body.classList.add('tut-on');
+    clearInterval(this.timer);this.timer=setInterval(()=>this.place(),200);
+    addEventListener('resize',this._rz=()=>this.place());
+    this.show();
+  },
+  stop(){
+    if(!this.on)return;this.on=false;clearInterval(this.timer);removeEventListener('resize',this._rz);
+    document.body.classList.remove('tut-on');G.forceDice=null;
+    prefs.tutDone=true;store.set('cantstop.prefs.v1',prefs);$('#btnTut').classList.remove('nudge');
+  },
+  show(){
+    const s=this.steps[this.i];
+    $('#tutTitle').textContent=s.title;$('#tutText').textContent=s.text;
+    $('#tutStep').textContent=`${this.i+1} / ${this.steps.length}`;
+    const nx=$('#tutNext');nx.style.display=s.wait?'none':'';nx.textContent=s.last?'開始對戰 ▶':'下一步 ▶';
+    $('#tutRing').classList.toggle('pulse',!!s.wait);
+    $(s.sel)?.scrollIntoView({block:'nearest'});
+    this.place();
+  },
+  /** 依目標元素位置擺放四片擋板、光圈與提示卡；只有「等玩家操作」的步驟才把洞口留空 */
+  place(){
+    if(!this.on)return;
+    const s=this.steps[this.i],el=$(s.sel);if(!el)return;
+    let r=el.getBoundingClientRect();const pad=6,W=innerWidth,Hh=innerHeight;
+    if(s.sel2){const q=$(s.sel2).getBoundingClientRect();r={left:Math.min(r.left,q.left),top:Math.min(r.top,q.top),right:Math.max(r.right,q.right),bottom:Math.max(r.bottom,q.bottom)};}   // 洞口涵蓋兩個元素（骰子＋組合卡）
+    const x=Math.max(0,r.left-pad),y=Math.max(0,r.top-pad),x2=Math.min(W,r.right+pad),y2=Math.min(Hh,r.bottom+pad);
+    const set=(id,l,t,w,h)=>{const e=$(id).style;e.left=l+'px';e.top=t+'px';e.width=Math.max(0,w)+'px';e.height=Math.max(0,h)+'px';};
+    set('#tutT',0,0,W,y);set('#tutB',0,y2,W,Hh-y2);set('#tutL',0,y,x,y2-y);set('#tutR',x2,y,W-x2,y2-y);
+    const ring=$('#tutRing').style;ring.left=x+'px';ring.top=y+'px';ring.width=(x2-x)+'px';ring.height=(y2-y)+'px';
+    ring.pointerEvents=s.wait?'none':'auto';            // 純說明步驟：洞口也擋住，避免誤觸
+    const tip=$('#tutTip'),th=tip.offsetHeight,tw=tip.offsetWidth;
+    let top=y2+12;if(top+th>Hh-8)top=y-th-12;if(top<8)top=Hh-th-12;   // 下方放不下→上方；都不行→貼底
+    tip.style.top=top+'px';tip.style.left=Math.min(Math.max(12,(x+x2)/2-tw/2),W-tw-12)+'px';
+  },
+  next(){if(this.steps[this.i].last){toLobby();return;}this.i++;this.show();},
+  event(name){if(this.on&&this.steps[this.i].wait===name)setTimeout(()=>{if(this.on)this.next();},name==='picked'?650:name==='stopped'?900:150);}
+};
+$('#btnTut').onclick=()=>Tut.start();$('#tutNext').onclick=()=>Tut.next();$('#tutSkip').onclick=toLobby;
 
 /* ---- 大廳 ---- */
 function renderLobby(){
@@ -818,8 +1040,8 @@ $('#btnClear').onclick=e=>{
   clearTimeout(clearArm);clearArm=null;b.textContent='清除戰績';b.style.borderColor=b.style.color='';
   stats={...STAT_DEF};store.set(STAT_KEY,stats);renderStats();
 };
-BGM.init();renderLobby();renderStats();
-window.__cs={G,Rules,AI,startGame};
+BGM.init();renderLobby();renderStats();applyTheme(prefs.theme);if(!prefs.tutDone)$('#btnTut').classList.add('nudge');
+window.__cs={G,Rules,AI,startGame,applyTheme,Tut};
 }
 else{module.exports={Rules,AI,COLS,H};}
 </script>
