@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>欲罷不能 Can't Stop</title>
-<meta name="description" content="經典桌遊《欲罷不能》(Can't Stop) 網頁版：五階 AI、本地雙人、三種風格（原版桌遊／霓虹科技／POP）。">
+<meta name="description" content="經典桌遊《欲罷不能》(Can't Stop) 網頁版：五階 AI、本地雙人、三種風格（原版桌遊／霓虹科技／磚塊冒險）。">
 <meta name="theme-color" content="#e9dabb">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<script>try{document.documentElement.dataset.theme=JSON.parse(localStorage.getItem('cantstop.prefs.v1')||'{}').theme||'classic';}catch(e){}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23b3261e' d='M7 1h10l6 6v10l-6 6H7l-6-6V7z'/><rect x='6' y='6' width='12' height='12' rx='2.5' fill='%23fff8e4'/><circle cx='9.3' cy='9.3' r='1.3'/><circle cx='14.700' cy='9.3' r='1.3'/><circle cx='12' cy='12' r='1.3'/><circle cx='9.3' cy='14.700' r='1.3'/><circle cx='14.700' cy='14.700' r='1.3'/></svg>">
+<script>try{var t=JSON.parse(localStorage.getItem('cantstop.prefs.v1')||'{}').theme||'classic';document.documentElement.dataset.theme=t==='pop'?'mario':t;}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800&family=Fredoka:wght@500;600;700&family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800&family=Press+Start+2P&family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <style>
 /* =====================================================================
  * 主題 token：皮膚全部集中在這三個區塊，結構樣式只吃變數
- *   classic = 原版實體桌遊（紅色停車牌棋盤，預設）／ neon = 霓虹科技 ／ pop = POP 普普
- *   --gr/--ga = 發光半徑/濃度（非霓虹主題歸零）；--hard = POP 的硬陰影；--bw = 邊框粗細
+ *   classic = 原版實體桌遊（紅色停車牌棋盤，預設）／ neon = 霓虹科技 ／ mario = 磚塊冒險（致敬瑪利歐的地底關）
+ *   --gr/--ga = 發光半徑/濃度（非霓虹主題歸零）；--hard = 磚塊冒險的硬陰影；--bw = 邊框粗細
  * ===================================================================== */
 :root{
   --ds:58px;
@@ -30,7 +30,7 @@
   --p1:#23934f;--p2:#2a66b3;--run:#fffdf4;--p1-ink:#1b7a41;--p2-ink:#2459a0;--accent:#b3261e;--accent-ink:#a3221b;
   --danger:#c62828;--ok:#23934f;--warn:#d98a00;
   --title-c:#b3261e;--title-sh:0 2px 0 #fff6dc,0 5px 0 rgba(84,56,20,.22);--title-anim:none;
-  --board-bg:radial-gradient(circle at 50% 35%,#d8382f,#a81d1d 75%);--board-bd:#7d1414;--board-clip:polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%);
+  --board-bg:radial-gradient(circle at 50% 35%,#d8382f,#a81d1d 75%);--board-bd:#7d1414;
   --cell-bg:#fff8e4;--cell-bd:#e2cf9b;--cell-r:5px;--cell-sh:inset 0 -2px 0 rgba(120,84,40,.12);
   --top-bg:#ffd84d;--top-bd:#c79a00;--lab:#ffd9cf;--lab-on:#ffe27a;--hl:#fff;--hl-fill:rgba(255,255,255,.14);
   --tgt:#ffb300;--claim-mix:62%;
@@ -53,7 +53,7 @@
   --p1:#39ff14;--p2:#ff2d95;--run:#00d4ff;--p1-ink:#39ff14;--p2-ink:#ff2d95;--accent:#00d4ff;--accent-ink:#00d4ff;
   --danger:#ff3b3b;--ok:#39ff14;--warn:#facc15;
   --title-c:#fff;--title-sh:0 0 6px #fff,0 0 18px #00d4ff,0 0 42px #00d4ff,0 0 80px rgba(0,212,255,.6);--title-anim:flicker 5s infinite;
-  --board-bg:var(--panel-bg);--board-bd:var(--panel-bd);--board-clip:none;
+  --board-bg:var(--panel-bg);--board-bd:var(--panel-bd);
   --cell-bg:rgba(15,23,42,.9);--cell-bd:rgba(71,85,105,.5);--cell-r:6px;--cell-sh:none;
   --top-bg:linear-gradient(180deg,rgba(250,204,21,.16),rgba(15,23,42,.9));--top-bd:rgba(250,204,21,.55);--lab:#64748b;--lab-on:#00d4ff;--hl:#00d4ff;--hl-fill:rgba(0,212,255,.06);
   --tgt:#00d4ff;--claim-mix:18%;
@@ -66,33 +66,33 @@
   --card-bg:rgba(2,6,23,.75);--card-bd:rgba(0,212,255,.35);--num-ok:#fff;--sub-bg:rgba(2,6,23,.65);--avatar-bg:#0b1224;--peak-off:#1e293b;
   --ov-bg:rgba(2,6,23,.94);
 }
-[data-theme=pop]{
-  --font-disp:'Fredoka','Noto Sans TC',sans-serif;--disp-ls:.01em;
-  --page:radial-gradient(#FFD9A8 1.6px,transparent 1.7px) 0 0/18px 18px,#FFF1DC;--page-solid:#FFF1DC;
-  --deco:none;--deco-op:0;
-  --ink:#2B2140;--ink-dim:#65597C;--ink-faint:#8f84a3;
-  --panel-bg:#fff;--panel-bd:#2B2140;--panel-sh:4px 4px 0 #2B2140;--panel-r:18px;--panel-blur:none;
-  --bw:2.5px;--hard:3px 3px 0 #2B2140;
-  --p1:#2FD08F;--p2:#FF6FAE;--run:#FFD447;--p1-ink:#0E9C77;--p2-ink:#E8468E;--accent:#FF6FAE;--accent-ink:#E8468E;
-  --danger:#D92C4A;--ok:#0E9C77;--warn:#f59f00;
-  --title-c:#2B2140;--title-sh:none;--title-anim:none;
-  --board-bg:#8EC9FF;--board-bd:#2B2140;--board-clip:none;
-  --cell-bg:#fff;--cell-bd:#2B2140;--cell-r:8px;--cell-sh:none;
-  --top-bg:#2B2140;--top-bd:#2B2140;--lab:#2B2140;--lab-on:#E8468E;--hl:#2B2140;--hl-fill:rgba(255,255,255,.35);
-  --tgt:#FFD447;--claim-mix:75%;
-  --die-bg:#fff;--die-bd:#2B2140;--die-pip:#2B2140;--die-r:12px;--die-sh:none;--pa:#2B2140;--pa-pip:#E8468E;--pb:#2B2140;--pb-pip:#2f8fe6;
-  --input-bg:#fff;--input-bd:#2B2140;--trk-off:#fff;--thumb:#FFD447;
-  --roll-bg:#FFD447;--roll-fg:#2B2140;--roll-sh:3px 3px 0 #2B2140;--stop-bg:#7BE3C8;--stop-fg:#2B2140;--stop-bd:#2B2140;--stop-sh:3px 3px 0 #2B2140;
-  --start-bg:#FF6FAE;--start-fg:#2B2140;--start-sh:4px 4px 0 #2B2140;--ghost-bg:#fff;--ghost-bd:#2B2140;--ghost-fg:#2B2140;--btn-bd:#2B2140;
-  --seg-bg:#FFE3BD;--seg-on-bg:#FFD447;--seg-on-fg:#2B2140;--seg-on-sh:0 0 0 2.5px #2B2140,3px 3px 0 #2B2140;
-  --card-bg:#fff;--card-bd:#2B2140;--num-ok:#2B2140;--sub-bg:#FFF1DC;--avatar-bg:#fff;--peak-off:#e6dcef;
-  --ov-bg:rgba(255,241,220,.97);
+[data-theme=mario]{
+  --font-disp:'Press Start 2P','Noto Sans TC',monospace;--disp-ls:0;
+  --page:radial-gradient(46px 17px at 14% 13%,#fff 97%,transparent),radial-gradient(30px 14px at 19% 11%,#fff 97%,transparent),radial-gradient(54px 19px at 78% 22%,#fff 97%,transparent),radial-gradient(34px 15px at 84% 20%,#fff 97%,transparent),radial-gradient(40px 15px at 46% 6%,#fff 97%,transparent),#5c94fc;--page-solid:#5c94fc;
+  --deco:linear-gradient(transparent calc(100% - 22px),#2b1600 calc(100% - 22px) calc(100% - 19px),#c84c0c calc(100% - 19px));--deco-size:auto;--deco-op:1;--deco-mask:none;
+  --ink:#2b1600;--ink-dim:#5a3d1e;--ink-faint:#8a6a44;
+  --panel-bg:#fff4d6;--panel-bd:#2b1600;--panel-sh:4px 4px 0 #2b1600;--panel-r:8px;--panel-blur:none;
+  --bw:3px;--hard:3px 3px 0 #2b1600;--gr:0px;--ga:0%;
+  --p1:#e52521;--p2:#00a800;--run:#fbd000;--p1-ink:#c81e1a;--p2-ink:#007a00;--accent:#e52521;--accent-ink:#c81e1a;
+  --danger:#e52521;--ok:#00a800;--warn:#f59f00;
+  --title-c:#fbd000;--title-sh:4px 4px 0 #2b1600;--title-anim:none;
+  --board-bg:#000;--board-bd:#2b1600;
+  --cell-bg:#0f7a94;--cell-bd:#032c38;--cell-r:2px;--cell-sh:inset 2px 2px 0 rgba(136,216,232,.55),inset -2px -2px 0 rgba(0,0,0,.35);
+  --top-bg:#fca044;--top-bd:#2b1600;--lab:#fff;--lab-on:#fbd000;--hl:#fbd000;--hl-fill:rgba(251,208,0,.16);
+  --tgt:#fbd000;--claim-mix:72%;
+  --die-bg:#fff;--die-bd:#2b1600;--die-pip:#2b1600;--die-r:8px;--die-sh:none;--pa:#2b1600;--pa-pip:#e52521;--pb:#2b1600;--pb-pip:#0058f8;
+  --input-bg:#fff;--input-bd:#2b1600;--trk-off:#fff;--thumb:#fbd000;
+  --roll-bg:#e52521;--roll-fg:#fff;--roll-sh:3px 3px 0 #2b1600;--stop-bg:#00a800;--stop-fg:#fff;--stop-bd:#2b1600;--stop-sh:3px 3px 0 #2b1600;
+  --start-bg:#fbd000;--start-fg:#2b1600;--start-sh:4px 4px 0 #2b1600;--ghost-bg:#fff;--ghost-bd:#2b1600;--ghost-fg:#2b1600;--btn-bd:#2b1600;
+  --seg-bg:#e8c888;--seg-on-bg:#fbd000;--seg-on-fg:#2b1600;--seg-on-sh:0 0 0 3px #2b1600,3px 3px 0 #2b1600;
+  --card-bg:#fff;--card-bd:#2b1600;--num-ok:#2b1600;--sub-bg:#fff4d6;--avatar-bg:#fff;--peak-off:#d8b878;
+  --ov-bg:rgba(92,148,252,.97);
 }
 
 *{-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--page-solid);color:var(--ink);overflow-x:hidden}
-[data-theme=pop] body{font-family:'Fredoka','Noto Sans TC',system-ui,sans-serif;font-weight:500}
+[data-theme=mario] .orb,[data-theme=mario] .title{font-weight:400}
 .orb{font-family:var(--font-disp);letter-spacing:var(--disp-ls)}
 .dim{color:var(--ink-dim)}.faint{color:var(--ink-faint)}.t-danger{color:var(--danger)}
 .glow-t{text-shadow:0 0 var(--gr) color-mix(in srgb,currentColor var(--ga),transparent)}
@@ -102,7 +102,8 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--page-solid
 #topfade{position:fixed;top:0;left:0;right:0;height:calc(64px + env(safe-area-inset-top));z-index:45;pointer-events:none;background:linear-gradient(var(--page-solid) 55%,transparent)}
 .panel{background:var(--panel-bg);border:var(--bw) solid var(--panel-bd);border-radius:var(--panel-r);box-shadow:var(--panel-sh);backdrop-filter:var(--panel-blur);-webkit-backdrop-filter:var(--panel-blur)}
 .title{font-family:var(--font-disp);color:var(--title-c);text-shadow:var(--title-sh);animation:var(--title-anim)}
-[data-theme=pop] .title{display:inline-block;background:#FFD447;border:3px solid #2B2140;border-radius:22px;padding:.12em .5em;box-shadow:6px 6px 0 #2B2140;transform:rotate(-2deg);font-weight:700}
+[data-theme=mario] .title{font-size:clamp(24px,7.6vw,54px);letter-spacing:0;line-height:1.3}
+[data-theme=mario] .orb{font-size:.72em}[data-theme=mario] .stat b{font-size:1.25rem;line-height:1.5}[data-theme=mario] .num b{font-size:.95rem;line-height:1.9}
 @keyframes flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.72}}
 .t-p1{color:var(--p1-ink);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--p1) var(--ga),transparent)}
 .t-p2{color:var(--p2-ink);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--p2) var(--ga),transparent)}
@@ -134,7 +135,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 #bgmPlay,#btnTheme{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;transition:all .2s}
 #bgmPlay{background:color-mix(in srgb,var(--accent) 14%,transparent);border:max(1px,var(--bw)) solid var(--accent);color:var(--accent-ink);box-shadow:0 0 var(--gr) color-mix(in srgb,var(--accent) 40%,transparent)}
 #bgmPlay.on{background:var(--accent);color:var(--page-solid)}
-[data-theme=pop] #bgmPlay{border-color:var(--ink);color:var(--ink);background:#FFD447}[data-theme=pop] #bgmPlay.on{background:#FF6FAE;color:var(--ink)}
+[data-theme=mario] #bgmPlay{border-color:var(--ink);color:var(--ink);background:#fbd000}[data-theme=mario] #bgmPlay.on{background:#e52521;color:#fff}
 #btnTheme{height:auto;width:auto;border-radius:12px;font-size:15px;line-height:1}
 .eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq i{width:3px;background:var(--accent);border-radius:2px;height:3px}
 .eq.on i{animation:eq 1s ease-in-out infinite}.eq.on i:nth-child(2){animation-delay:.2s}.eq.on i:nth-child(3){animation-delay:.45s}
@@ -160,9 +161,9 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .pcard{border-radius:14px;padding:10px 12px;border:max(1px,var(--bw)) solid var(--card-bd);background:var(--sub-bg);transition:all .3s;opacity:.55}
 .pcard.active{opacity:1;border-color:var(--c);box-shadow:0 0 calc(var(--gr)*1.8) color-mix(in srgb,var(--c) 30%,transparent),inset 0 0 18px color-mix(in srgb,var(--c) 8%,transparent),var(--hard)}
 [data-theme=classic] .pcard.active{box-shadow:0 0 0 2px var(--c),0 3px 0 color-mix(in srgb,var(--c) 60%,#000)}
-[data-theme=pop] .pcard.active{border-color:var(--ink);background:color-mix(in srgb,var(--c) 35%,#fff)}
+[data-theme=mario] .pcard.active{border-color:var(--ink);background:color-mix(in srgb,var(--c) 22%,#fff4d6)}
 .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--avatar-bg);border:2px solid var(--c);box-shadow:0 0 var(--gr) var(--c);flex:none}
-[data-theme=pop] .avatar{border:2.5px solid var(--ink);background:var(--c)}
+[data-theme=mario] .avatar{border:3px solid var(--ink);border-radius:6px}
 .avatar.breath{animation:breath 1.5s ease-in-out infinite}
 @keyframes breath{0%,100%{box-shadow:0 0 4px var(--c),0 0 0 0 color-mix(in srgb,var(--c) 0%,transparent)}50%{box-shadow:0 0 18px var(--c),0 0 0 7px color-mix(in srgb,var(--c) 22%,transparent)}}
 .peak{width:14px;height:14px;clip-path:polygon(50% 0,100% 100%,0 100%);background:var(--peak-off);transition:all .3s}
@@ -170,10 +171,12 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .dots::after{content:'';animation:dots 1.2s steps(4,end) infinite}
 @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
 /* ---------- 棋盤：格子尺寸由容器大小推算（cqw/cqh），任何螢幕都塞得下 ---------- */
-#boardWrap{container-type:size;min-height:0;display:flex;justify-content:center;align-items:center;padding:6px;background:var(--board-bg);border-color:var(--board-bd);clip-path:var(--board-clip)}
-[data-theme=classic] #boardWrap{border:0;box-shadow:none;filter:none}
-#boardShadow{grid-area:board;display:none}
-[data-theme=classic] #boardShadow{display:block;background:#5a0f0f;clip-path:var(--board-clip);transform:translateY(6px);border-radius:0;opacity:.55;filter:blur(3px)}
+#boardWrap{container-type:size;position:relative;min-height:0;display:flex;justify-content:center;align-items:center;padding:6px;background:var(--board-bg);border-color:var(--board-bd)}
+[data-theme=classic] #boardWrap{border-color:transparent;box-shadow:none;background:none}
+[data-theme=classic] #boardWrap::before,[data-theme=classic] #boardWrap::after{content:'';position:absolute;inset:0;z-index:-1;clip-path:polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%)}
+[data-theme=classic] #boardWrap::before{background:var(--board-bg)}
+[data-theme=classic] #boardWrap::after{z-index:-2;background:#5a0f0f;transform:translateY(6px);opacity:.5;filter:blur(3px)}
+
 #board{position:relative;padding:var(--lab-t,30px) 0 var(--lab-b,30px);--ch:min(calc((100cqh - var(--lab-t,30px) - var(--lab-b,30px))/13),46px);--cw:min(calc(100cqw/11),calc(var(--ch)*1.5),60px)}
 [data-theme=classic] #board{--ch:min(calc((100cqh - var(--lab-t,30px) - var(--lab-b,30px))/13.9),46px);--cw:min(calc(100cqw/12.2),calc(var(--ch)*1.5),60px)}
 #cols{position:relative;display:flex;align-items:center;height:calc(var(--ch)*13);width:calc(var(--cw)*11)}
@@ -188,11 +191,11 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .cell i{display:block;width:100%;height:100%;border-radius:var(--cell-r);background:var(--cell-bg);border:max(1px,calc(var(--bw) - .5px)) solid var(--cell-bd);box-shadow:var(--cell-sh);transition:all .25s}
 .cell.top i{border-color:var(--top-bd);background:var(--top-bg)}
 .cell.target i{border-color:var(--tgt);background:color-mix(in srgb,var(--tgt) 45%,var(--cell-bg));box-shadow:0 0 calc(var(--gr)*1.2) var(--tgt);animation:tgt .7s ease-in-out infinite alternate}
-[data-theme=pop] .cell.target i{border-color:var(--ink)}
+[data-theme=mario] .cell.target i{border-color:var(--ink)}
 @keyframes tgt{to{background:color-mix(in srgb,var(--tgt) 85%,var(--cell-bg))}}
 .col.c0{--oc:var(--p1)}.col.c1{--oc:var(--p2)}
 .col.c0 .cell i,.col.c1 .cell i{background:color-mix(in srgb,var(--oc) var(--claim-mix),var(--cell-bg));border-color:color-mix(in srgb,var(--oc) 70%,var(--cell-bd));box-shadow:inset 0 0 calc(var(--gr)*.8) color-mix(in srgb,var(--oc) 25%,transparent)}
-[data-theme=pop] .col.c0 .cell i,[data-theme=pop] .col.c1 .cell i{border-color:var(--ink)}
+[data-theme=mario] .col.c0 .cell i,[data-theme=mario] .col.c1 .cell i{border-color:var(--ink)}
 [data-theme=neon] .col.c0 .lab,[data-theme=neon] .col.c1 .lab{color:var(--oc);text-shadow:0 0 8px var(--oc)}
 .col.justclaimed{animation:claimed 1s ease-out}
 @keyframes claimed{0%{filter:brightness(1.9) saturate(1.5)}100%{filter:none}}
@@ -203,23 +206,28 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .piece.pre,.piece.gone{opacity:0}
 .piece.landed{animation:land .38s cubic-bezier(.3,1.6,.5,1)}
 @keyframes land{0%{transform:translateY(0)}40%{transform:translateY(-38%) scale(1.12)}70%{transform:translateY(0) scale(.94,1.06)}100%{transform:none}}
-.marker{--sz:calc(var(--cw)*.38);z-index:2}
+.marker{--sz:calc(var(--cw)*.5);z-index:2}
 .marker.p0{--c:var(--p1)}.marker.p1{--c:var(--p2)}
-.marker.crown{--sz:calc(var(--cw)*.52)}
-.runner{--sz:calc(var(--cw)*.48);z-index:3;--c:var(--run)}
-.marker .shape{width:100%;height:100%;border-radius:50%}
-.runner .shape{width:100%;height:100%;transform:rotate(45deg) scale(.82);border-radius:22%}
-/* 棋子外觀：霓虹＝發光體／原版＝木頭棋子／POP＝粗黑邊色塊 */
-[data-theme=neon] .marker .shape{background:radial-gradient(circle at 35% 30%,#fff,var(--c) 45%);box-shadow:0 0 6px var(--c),0 0 14px var(--c)}
-[data-theme=neon] .runner .shape{background:radial-gradient(circle at 40% 40%,#fff,var(--run) 55%);box-shadow:0 0 8px var(--run),0 0 20px var(--run),0 0 34px rgba(0,212,255,.6);animation:runpulse 1.2s ease-in-out infinite}
-@keyframes runpulse{50%{box-shadow:0 0 5px var(--run),0 0 12px var(--run)}}
-[data-theme=classic] .piece .shape{background:radial-gradient(circle at 35% 28%,color-mix(in srgb,var(--c) 55%,#fff),var(--c) 58%,color-mix(in srgb,var(--c) 70%,#000));border:1.5px solid color-mix(in srgb,var(--c) 45%,#000);box-shadow:0 2px 3px rgba(40,20,0,.45)}
-[data-theme=classic] .runner{--sz:calc(var(--cw)*.54)}
-[data-theme=classic] .runner .shape{background:radial-gradient(circle at 35% 28%,#fff,#f3ecd9 60%,#cfc4a8);border:2px solid #2b2119;box-shadow:0 2px 4px rgba(20,10,0,.6);animation:runbob 1.4s ease-in-out infinite}
-@keyframes runbob{50%{box-shadow:0 2px 4px rgba(20,10,0,.6),0 0 0 3px rgba(43,33,25,.35)}}
-[data-theme=pop] .piece .shape{background:var(--c);border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.marker.crown{--sz:calc(var(--cw)*.66)}
+.runner{--sz:calc(var(--cw)*.6);z-index:3;--c:var(--run)}
+/* 棋子一律是 SVG：.pc 吃玩家色、.po 描邊、.pw 白色細節、.pe 眼睛；各風格只調描邊與光影 */
+.shape{width:100%;height:100%}
+.shape svg,.avatar svg,.pick svg{display:block;width:100%;height:100%;overflow:visible}
+.pc{fill:var(--c)}.pw{fill:#fff}.pe{fill:var(--po-eye,#2b1600)}
+.po{stroke:var(--po,transparent);stroke-width:var(--pow,1.5);stroke-linejoin:round;paint-order:stroke fill}
+[data-theme=classic]{--po:rgba(30,18,8,.75);--pow:1.4}
+[data-theme=classic] .piece svg{filter:drop-shadow(0 2px 1.5px rgba(20,10,0,.55))}
+[data-theme=classic] .runner svg{animation:runbob 1.4s ease-in-out infinite}
+@keyframes runbob{50%{transform:translateY(-12%)}}
+[data-theme=neon] .piece svg{filter:drop-shadow(0 0 2.5px var(--c)) drop-shadow(0 0 7px var(--c))}
+[data-theme=neon] .runner svg{animation:runpulse 1.2s ease-in-out infinite}
+@keyframes runpulse{50%{filter:drop-shadow(0 0 1.5px var(--c)) drop-shadow(0 0 3px var(--c));transform:scale(.9)}}
+[data-theme=mario]{--po:#2b1600;--pow:1.7}
+[data-theme=mario] .piece svg{filter:drop-shadow(1.5px 1.5px 0 rgba(0,0,0,.7))}
+[data-theme=mario] .runner svg{animation:coinspin 1.1s steps(6) infinite}
+@keyframes coinspin{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.18)}}
 .piece.busting{animation:bustfx 1.25s ease-in forwards;transition:none}
-.piece.busting .shape{background:var(--danger)!important;box-shadow:0 0 10px var(--danger),0 0 28px var(--danger)!important;animation:none!important}
+.piece.busting .pc,.piece.busting ellipse{fill:var(--danger)!important}.piece.busting svg{filter:drop-shadow(0 0 5px var(--danger)) drop-shadow(0 0 12px var(--danger))!important;animation:none!important}
 @keyframes bustfx{0%{opacity:1;transform:scale(1)}12%{transform:scale(1.5);filter:brightness(1.8)}24%{opacity:.35;transform:scale(1)}36%{opacity:1;transform:scale(1.4);filter:brightness(1.8)}48%{opacity:.35}60%{opacity:1;transform:scale(1.25)}100%{opacity:0;transform:scale(.2) translateY(24px);filter:blur(3px)}}
 .shake{animation:shake .55s cubic-bezier(.36,.07,.19,.97)}
 @keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-7px,2px) rotate(-.3deg)}40%,60%{transform:translate(7px,-1px) rotate(.3deg)}}
@@ -229,7 +237,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 #flash{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5}
 #flash span{font-family:var(--font-disp);font-weight:900;font-size:clamp(30px,7vw,72px);letter-spacing:.06em;opacity:0;color:var(--fc);text-shadow:0 0 12px var(--fc),0 0 40px var(--fc);white-space:nowrap}
 [data-theme=classic] #flash span{color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45),0 0 18px rgba(0,0,0,.5);-webkit-text-stroke:1px rgba(0,0,0,.35)}
-[data-theme=pop] #flash span{color:var(--fc);text-shadow:3px 3px 0 var(--ink);-webkit-text-stroke:2px var(--ink);paint-order:stroke fill}
+[data-theme=mario] #flash span{color:#fff;font-size:clamp(20px,5vw,48px);text-shadow:4px 4px 0 var(--ink)}
 #flash.on span{animation:flash 1.3s ease-out}
 @keyframes flash{0%{opacity:0;transform:scale(2.2)}18%{opacity:1;transform:scale(1)}70%{opacity:1}100%{opacity:0;transform:scale(.92) translateY(-12px)}}
 /* ---------- 骰子 ---------- */
@@ -253,7 +261,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .die.pa{--dc:var(--pa);--dp:var(--pa-pip)}.die.pb{--dc:var(--pb);--dp:var(--pb-pip)}
 .die.pa .face,.die.pb .face{box-shadow:0 0 calc(var(--gr)*1.4) var(--dc),var(--die-sh)}
 [data-theme=classic] .die.pa .face,[data-theme=classic] .die.pb .face{border-width:2.5px}
-[data-theme=pop] .die.pa .face{background:#FFE0EE}[data-theme=pop] .die.pb .face{background:#DDF0FF}
+[data-theme=mario] .die.pa .face{background:#ffe1df}[data-theme=mario] .die.pb .face{background:#dbe8ff}
 /* ---------- 組合卡片 ---------- */
 #combos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-height:92px}
 .combo-empty{grid-column:1/-1;display:grid;place-items:center;border:max(1px,calc(var(--bw) - 1px)) dashed var(--ink-faint);border-radius:12px;color:var(--ink-faint);font-size:.8rem}
@@ -262,7 +270,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 @keyframes cardin{from{opacity:0;transform:translateY(12px) scale(.95)}}
 .combo[data-play]{cursor:pointer}
 .live .combo[data-play]:hover,.combo.ai-pick{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 0 calc(var(--gr)*1.8) color-mix(in srgb,var(--accent) 55%,transparent),0 0 0 1.5px var(--accent),var(--hard)}
-[data-theme=pop] .live .combo[data-play]:hover,[data-theme=pop] .combo.ai-pick{background:#FFD447;border-color:var(--ink);box-shadow:5px 5px 0 var(--ink)}
+[data-theme=mario] .live .combo[data-play]:hover,[data-theme=mario] .combo.ai-pick{background:#fbd000;border-color:var(--ink);box-shadow:5px 5px 0 var(--ink)}
 .combo.disabled{opacity:.4}
 .combo .row{display:flex;align-items:flex-start;justify-content:center;gap:4px}
 .combo .amp{color:var(--ink-faint);font-weight:700;padding-top:6px}
@@ -276,8 +284,27 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .combo .sub{font-size:.62rem;color:var(--ink-dim);margin-top:4px;line-height:1.2}
 .rpip{width:13px;height:13px;transform:rotate(45deg);border-radius:3px;background:var(--peak-off);border:max(1px,calc(var(--bw) - 1px)) solid var(--ink-faint);transition:all .3s}
 .rpip.on{background:var(--run);border-color:color-mix(in srgb,var(--run) 60%,var(--ink));box-shadow:0 0 var(--gr) var(--run)}
-[data-theme=classic] .rpip.on{border-color:#4a3a28}[data-theme=pop] .rpip.on{border-color:var(--ink)}
+[data-theme=classic] .rpip.on{border-color:#4a3a28}[data-theme=mario] .rpip.on{border-color:var(--ink)}
 #gaugeBar{height:100%;border-radius:99px;transition:width .4s,background .4s}
+/* ---------- 磚塊冒險：地底磚紋與問號磚（只疊 background-image，不蓋掉封頂／落點的底色） ---------- */
+[data-theme=mario] .cell i{background-image:linear-gradient(transparent 44%,var(--cell-bd) 44% 56%,transparent 56%),linear-gradient(90deg,transparent 46%,var(--cell-bd) 46% 54%,transparent 54%);background-size:100% 100%,100% 44%;background-repeat:no-repeat;background-position:0 0,0 0}
+[data-theme=mario] .cell.top i{background-image:none;position:relative;box-shadow:inset 2px 2px 0 #ffd8a0,inset -2px -2px 0 #a04800}
+[data-theme=mario] .cell.top i::after{content:'?';position:absolute;inset:0;display:grid;place-items:center;font:400 calc(var(--ch)*.42)/1 'Press Start 2P',monospace;color:#fff;text-shadow:1.5px 1.5px 0 #2b1600}
+/* ---------- 圖示（線條 SVG） ---------- */
+.ic{display:inline-block;vertical-align:-.28em;width:1.35em;height:1.35em;margin-right:.35em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* 注意：別用 .f1–.f6，那是骰子六個面的 3D 轉向 class */
+.ic .i1{fill:currentColor;stroke:none}.ic .i2{fill:currentColor;fill-opacity:.28}
+#btnTheme .ic{margin:0;width:1.5em;height:1.5em;vertical-align:middle}
+.seg .ic{display:block;margin:0 auto 4px;width:1.5em;height:1.5em}
+.trophy{display:grid;place-items:center;margin-bottom:12px;color:var(--warn)}.trophy .ic{width:72px;height:72px;margin:0;stroke-width:1.6}
+.avatar svg{width:68%;height:68%}
+/* ---------- 棋子樣式選單 ---------- */
+.prow{display:flex;align-items:center;gap:8px}
+.pick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;flex:1}
+.pick button{aspect-ratio:1;max-height:46px;display:grid;place-items:center;padding:6px;border-radius:10px;background:var(--sub-bg);border:max(1px,var(--bw)) solid var(--card-bd);transition:all .15s}
+.pick button svg{width:100%;height:100%;max-width:30px;max-height:30px}
+.pick button.on{background:var(--seg-on-bg);box-shadow:var(--seg-on-sh)}
+[data-theme=neon] .pick svg{filter:drop-shadow(0 0 3px var(--c))}
 /* ---------- 手機：壓縮控制區，把高度讓給棋盤 ---------- */
 @media (max-width:1023px){
   :root{--ds:46px}
@@ -342,8 +369,8 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
       <section class="panel p-5 space-y-4">
         <h2 class="orb text-sm tracking-widest t-run">GAME MODE</h2>
         <div class="seg" id="modeSeg">
-          <button data-mode="ai">🤖 單人對抗 AI</button>
-          <button data-mode="local">👥 雙人本地對戰</button>
+          <button data-mode="ai" data-ic="cpu">單人對抗 AI</button>
+          <button data-mode="local" data-ic="users">雙人本地對戰</button>
         </div>
         <div id="aiBox">
           <label class="text-xs dim block mb-1">AI 對手難度</label>
@@ -357,8 +384,13 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
           <label class="text-xs dim block mb-1">畫面風格</label>
           <div class="seg three" id="themeSeg"></div>
         </div>
+        <div>
+          <label class="text-xs dim block mb-1">棋子樣式</label>
+          <div id="pieceRows" class="space-y-2"></div>
+          <p id="pieceNote" class="text-xs faint hidden">原版風格固定使用實體遊戲的錐形棋子（暫時棋子為白色）。</p>
+        </div>
         <button id="btnStart" class="btn btn-start w-full orb text-lg">START ▶</button>
-        <button id="btnTut" class="btn btn-ghost w-full text-sm">🎓 新手教學（約 1 分鐘，邊玩邊學）</button>
+        <button id="btnTut" class="btn btn-ghost w-full text-sm" data-ic="help">新手教學（約 1 分鐘，邊玩邊學）</button>
         <details class="text-xs dim">
           <summary class="cursor-pointer" style="color:var(--ink)">規則速覽</summary>
           <ul class="list-disc pl-5 mt-2 space-y-1">
@@ -389,14 +421,13 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 <!-- ===== 遊戲 ===== -->
 <main id="game" class="hidden">
   <div id="topLeft">
-    <button id="btnBack" class="btn btn-ghost btn-md text-xs">← 大廳</button>
-    <button id="btnTheme" class="btn btn-ghost btn-md" title="切換畫面風格" aria-label="切換畫面風格">🎨</button>
+    <button id="btnBack" class="btn btn-ghost btn-md text-xs" data-ic="back">大廳</button>
+    <button id="btnTheme" class="btn btn-ghost btn-md" title="切換畫面風格" aria-label="切換畫面風格" data-ic="palette"></button>
     <span class="orb hidden md:inline text-sm tracking-widest dim">CAN'T STOP</span>
   </div>
   <div id="gameGrid">
     <div id="players" class="grid grid-cols-2 gap-2"></div>
 
-    <div id="boardShadow"></div>
     <div id="boardWrap" class="panel">
       <div id="board"><div id="cols"><div id="pieces"></div></div><div id="flash"><span></span></div></div>
     </div>
@@ -412,8 +443,8 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
       </div>
       <div id="combos"></div>
       <div class="grid grid-cols-2 gap-3 mt-4">
-        <button id="btnRoll" class="btn btn-roll">🎲 擲骰</button>
-        <button id="btnStop" class="btn btn-stop">✋ 收手</button>
+        <button id="btnRoll" class="btn btn-roll"></button>
+        <button id="btnStop" class="btn btn-stop" data-ic="flag">收手</button>
       </div>
     </div>
   </div>
@@ -427,7 +458,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
   <button id="passOk" class="btn btn-start orb px-10">READY ▶</button>
 </div></div>
 <div id="winOv" class="overlay"><div class="text-center pop max-w-md">
-  <div class="text-6xl mb-3">🏆</div>
+  <div class="trophy" data-ic="trophy"></div>
   <h2 id="winTitle" class="orb text-4xl sm:text-5xl font-black mb-2"></h2>
   <p id="winSub" class="dim mb-8"></p>
   <div class="grid grid-cols-2 gap-3"><button id="btnAgain" class="btn btn-start">再來一局</button><button id="btnLobby" class="btn btn-ghost">回大廳</button></div>
@@ -600,7 +631,7 @@ if(typeof document!=='undefined'){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const store={get(k,d){try{return{...d,...JSON.parse(localStorage.getItem(k)||'{}')};}catch(e){return{...d};}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
-const prefs=store.get('cantstop.prefs.v1',{mode:'ai',level:3,vol:60,track:0,theme:'classic',tutDone:false});
+const prefs=store.get('cantstop.prefs.v1',{mode:'ai',level:3,vol:60,track:0,theme:'classic',tutDone:false,pieces:null});
 
 const INC='https://incompetech.com/music/royalty-free/mp3-royaltyfree/';
 const TRACKS=[
@@ -782,7 +813,7 @@ function renderPieces(){
   for(const[key,w]of want){
     let el=layer.querySelector(`[data-key="${key}"]`);
     if(!el){
-      el=document.createElement('div');el.dataset.key=key;el.className=w.cls+' pre';el.innerHTML='<div class="shape"></div>';
+      el=document.createElement('div');el.dataset.key=key;el.dataset.kind=key[0]==='r'?'r':key.slice(0,2);el.className=w.cls+' pre';el.innerHTML=`<div class="shape">${pieceSVG(el.dataset.kind)}</div>`;
       placePiece(el,w.col,w.from,w.dx);layer.appendChild(el);
       el.addEventListener('transitionend',e=>{if(e.propertyName==='bottom'){el.classList.remove('landed');void el.offsetWidth;el.classList.add('landed');}});
       el.addEventListener('animationend',e=>{if(e.animationName==='land')el.classList.remove('landed');});
@@ -804,7 +835,7 @@ function renderPlayers(){
     const sub=ai?`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh}`:(st.mode==='ai'?'YOU':'HUMAN');
     const msg=act?(ai?(G.aiMsg||'AI 回合'):'行動中'):'等待中';
     return`<div class="pcard p${p} ${act?'active':''}" style="--c:var(--p${p+1})"><div class="flex items-center gap-2">
-      <div class="avatar ${ai&&act?'breath':''}">${ai?'🤖':p?'🧗‍♀️':'🧗'}</div>
+      <div class="avatar ${ai&&act?'breath':''}">${pieceSVG('m'+p)}</div>
       <div class="min-w-0 flex-1"><div class="font-bold text-sm t-p${p+1} truncate">${pname(p)} <span class="text-[10px] faint font-normal">${sub}</span></div>
       <div class="flex items-center gap-1 mt-1">${[0,1,2].map(i=>`<span class="peak ${i<n?'on':''}"></span>`).join('')}<span class="orb text-xs dim ml-1">${n}/3</span></div></div></div>
       <div class="pmsg text-[11px] mt-1.5 truncate ${act?'':'faint'} ${ai&&act&&G.thinking?'dots':''}">${msg}</div></div>`;
@@ -814,7 +845,7 @@ function renderCtrl(){
   const st=G.st,human=!isAI()&&st.phase!=='over',free=Rules.free(st);
   $('#btnRoll').disabled=!(human&&(st.phase==='start'||st.phase==='decide'));
   $('#btnStop').disabled=!(human&&st.phase==='decide');
-  $('#btnRoll').textContent=st.phase==='decide'?'🎲 繼續擲骰':'🎲 擲骰';
+  $('#btnRoll').innerHTML=IC.dice+(st.phase==='decide'?'繼續擲骰':'擲骰');
   $('#rpips').innerHTML=[0,1,2].map(i=>`<span class="rpip ${i<free?'on':''}"></span>`).join('');
   $('#rleft').textContent=free;
   const p=Rules.bustProb(st),pct=Math.round(p*100),bar=$('#gaugeBar');
@@ -823,7 +854,7 @@ function renderCtrl(){
   $('#gaugeTxt').textContent=pct+'%';$('#gaugeTxt').style.color=col;
   const who=`<span class="t-p${st.current+1}">${pname(st.current)}</span>`;
   const txt={start:`${who}：請擲骰`,rolling:'擲骰中…',choose:isAI()?`${who} 正在思考分組`:`${who}：選擇一組分組`,
-    decide:isAI()?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="t-danger font-bold">💥 爆掉了！本回合進度歸零</span>',
+    decide:isAI()?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="t-danger font-bold">爆掉了！本回合進度歸零</span>',
     bank:`${who} 收手，進度已保存`,over:'遊戲結束'}[st.phase]||'';
   $('#status').innerHTML=isAI()&&G.aiMsg&&st.phase!=='bust'?`<span class="t-p2 ${G.thinking?'dots':''}">${G.aiMsg}</span>`:txt;
 }
@@ -900,7 +931,7 @@ function switchTurn(reason){
   const st=G.st,prev=st.current;st.current=1-prev;
   if(st.mode==='local'){
     st.phase='start';renderAll();
-    $('#passSub').textContent=reason==='bust'?`${pname(prev)} 爆掉了 💥`:`${pname(prev)} 收手，進度已保存`;
+    $('#passSub').textContent=reason==='bust'?`${pname(prev)} 爆掉了`:`${pname(prev)} 收手，進度已保存`;
     const t=$('#passTitle');t.textContent=`請換 P${st.current+1} 操作`;t.className=`orb text-4xl sm:text-6xl font-black mb-3 t-p${st.current+1}`;
     $('#passOv').classList.add('on');
   }else beginTurn();
@@ -951,11 +982,69 @@ combos.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&canPick
 $('#passOk').onclick=()=>{$('#passOv').classList.remove('on');beginTurn();};
 $('#btnAgain').onclick=()=>startGame();$('#btnLobby').onclick=toLobby;$('#btnBack').onclick=toLobby;$('#btnStart').onclick=()=>startGame();
 
-/* ---- 畫面風格（三主題；皮膚全在 CSS 的 [data-theme] token 區塊） ---- */
+/* ---- 圖示（線條 SVG，吃 currentColor；不用 emoji） ---- */
+const ic=(d,o='')=>`<svg class="ic" viewBox="0 0 24 24" ${o}>${d}</svg>`;
+const IC={
+  dice:ic('<rect x="3" y="3" width="18" height="18" rx="4.5"/><circle class="i1" cx="8.3" cy="8.3" r="1.35"/><circle class="i1" cx="15.7" cy="8.3" r="1.35"/><circle class="i1" cx="12" cy="12" r="1.35"/><circle class="i1" cx="8.3" cy="15.7" r="1.35"/><circle class="i1" cx="15.7" cy="15.7" r="1.35"/>'),
+  flag:ic('<path d="M5.5 21.5V3.5"/><path class="i2" d="M5.5 4.5h12.5l-3 4 3 4H5.5z"/>'),
+  palette:ic('<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2.2-1 2.2-2.1 0-1.7 1-2.5 2.5-2.5H18a3 3 0 0 0 3-3C21 7.2 17 3 12 3z"/><circle class="i1" cx="7.6" cy="11.4" r="1.2"/><circle class="i1" cx="10.4" cy="7.4" r="1.2"/><circle class="i1" cx="15" cy="7.8" r="1.2"/>'),
+  cpu:ic('<rect x="6" y="6" width="12" height="12" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9.5 3v3M14.5 3v3M9.5 18v3M14.5 18v3M3 9.5h3M3 14.5h3M18 9.5h3M18 14.5h3"/>'),
+  users:ic('<circle cx="9" cy="8.5" r="3.2"/><path d="M3 20c0-3.6 2.6-6 6-6s6 2.4 6 6"/><circle cx="17" cy="9.5" r="2.5"/><path d="M16.5 14.2c2.7.2 4.5 2.3 4.5 5.3"/>'),
+  help:ic('<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.3 1.1-1.3 2.1"/><circle class="i1" cx="12" cy="17" r="1.1"/>'),
+  back:ic('<path d="M14.5 5.5L8 12l6.5 6.5"/>'),
+  trophy:ic('<path d="M7.5 4h9v5.2a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 5.5H4.2c0 3 1.2 4.6 3.6 4.9M16.5 5.5h3.3c0 3-1.2 4.6-3.6 4.9M12 13.7V17M8.5 20.5h7M9.5 17h5v3.5h-5z"/>')
+};
+
+/* ---- 棋子樣式：每個風格 5 種代表物（原版＝實體遊戲的錐形棋子，不提供選項）。
+ *      .pc＝吃玩家色、.po＝描邊、.pw＝白色細節；暫時棋子每個風格固定一種 ---- */
+const pxPath=rows=>rows.map((r,y)=>[...r].map((ch,x)=>ch==='#'?`M${x*3} ${y*3}h3v3h-3z`:'').join('')).join('');
+const sv=d=>`<svg viewBox="0 0 24 24">${d}</svg>`;
+const EYES='<path class="pe" d="M9.6 9.6h1.5v3.4H9.6zM12.9 9.6h1.5v3.4h-1.5z"/>';
+const PAWN=sv('<path class="pc po" d="M12 2.2a4.1 4.1 0 0 1 2.7 7.2L19 21.2H5L9.3 9.4A4.1 4.1 0 0 1 12 2.2z"/><ellipse class="pw" cx="10.5" cy="5.4" rx="1.1" ry="1.6" opacity=".55"/><path class="pw" d="M8.2 14.5l-1 2.8h9.6l-1-2.8z" opacity=".22"/>');
+const PIECES={
+  classic:{set:[{n:'原版棋子',s:PAWN}],run:PAWN},
+  neon:{run:sv('<path class="pc" d="M12 1.5L22.5 12 12 22.5 1.5 12z"/><path class="pw" d="M12 6.5L17.5 12 12 17.5 6.5 12z" opacity=".85"/>'),set:[
+    {n:'能量核心',s:sv('<path class="pc" d="M12 1.8l8.8 5.1v10.2L12 22.2l-8.8-5.1V6.9z"/><path class="pw" d="M12 7.2l4.2 2.4v4.8L12 16.8l-4.2-2.4V9.6z" opacity=".9"/>')},
+    {n:'閃電',s:sv('<path class="pc" d="M14 1.5L4.5 13.6h5.9L9 22.5l10.5-12.6h-6z"/>')},
+    {n:'火箭',s:sv('<path class="pc" d="M12 1.5c3.3 2.7 5 6.3 5 10.4l2.3 3.8-3.8-.6c-.6 1.5-1.7 2.6-3.5 3.7-1.8-1.1-2.9-2.2-3.5-3.7l-3.8.6L7 11.9c0-4.1 1.7-7.7 5-10.4z"/><circle class="pw" cx="12" cy="9.4" r="1.9"/><path class="pc" d="M10.3 20.2L12 23.4l1.7-3.2z"/>')},
+    {n:'入侵者',s:sv(`<path class="pc" d="${pxPath(['..#..#..','.######.','##.##.##','########','.#.##.#.','#.#..#.#','.#....#.'])}" transform="translate(0 1.5)"/>`)},
+    {n:'行星',s:sv('<circle class="pc" cx="12" cy="12" r="6.3"/><ellipse cx="12" cy="12" rx="11" ry="3.4" fill="none" style="stroke:var(--c)" stroke-width="1.9" transform="rotate(-22 12 12)"/><circle class="pw" cx="9.8" cy="9.8" r="1.5" opacity=".8"/>')}
+  ]},
+  mario:{run:sv('<ellipse class="po" cx="12" cy="12" rx="7.6" ry="10" fill="#fbd000"/><path d="M10.6 6.2h2.8v11.6h-2.8z" fill="#c07000"/><path class="pw" d="M8 8c.6-2 1.4-3 2.4-3.6" fill="none" stroke="#fff" stroke-width="1.3" opacity=".8"/>'),set:[
+    {n:'蘑菇',s:sv('<path class="po" d="M7 13h10v5.6a2.9 2.9 0 0 1-2.9 2.9H9.9A2.9 2.9 0 0 1 7 18.600z" fill="#fde8c8"/><path class="pc po" d="M2.2 13.6C2.2 7 6.6 2.3 12 2.3S21.800 7 21.800 13.6z"/><circle class="pw" cx="12" cy="7" r="2.5"/><circle class="pw" cx="5.700" cy="11.2" r="1.7"/><circle class="pw" cx="18.3" cy="11.2" r="1.7"/><path class="pe" d="M9.800 15.2h1.4v3H9.800zM12.800 15.2h1.4v3h-1.4z"/>')},
+    {n:'星星',s:sv('<path class="pc po" d="M12 1.6l3.1 6.700 7.300.8-5.500 5 1.600 7.200L12 17.700l-6.500 3.600 1.600-7.200-5.500-5 7.300-.8z"/>'+EYES)},
+    {n:'花',s:sv('<path d="M11 15h2v7h-2z" fill="#00a800" class="po"/><path d="M11.500 20c-3 .5-4.500-1-5-3 2.500-.3 4.300.6 5 3zM12.500 20c3 .5 4.500-1 5-3-2.500-.3-4.300.6-5 3z" fill="#00a800" class="po"/><ellipse class="pc po" cx="12" cy="9" rx="9.300" ry="7"/><ellipse class="pw" cx="12" cy="9" rx="5.800" ry="4.200"/>'+'<path class="pe" d="M10 7.400h1.300v3.200H10zM12.700 7.400H14v3.200h-1.300z"/>')},
+    {n:'龜殼',s:sv('<path class="pc po" d="M3 16C3 9 7 3.800 12 3.800S21 9 21 16z"/><path d="M12 4v12M5.500 9.500L12 13l6.500-3.500" fill="none" stroke="#fff" stroke-width="1.500" opacity=".9"/><rect class="pw po" x="2" y="15.500" width="20" height="4.700" rx="2.300"/>')},
+    {n:'水管',s:sv('<path class="pc po" d="M6 9h12v12.500H6z"/><path class="pc po" d="M3.500 2.800h17v6.400h-17z"/><path class="pw" d="M6.300 4.300h2v3.400h-2zM8.300 10.500h1.800v9.500H8.300z" opacity=".65"/>')}
+  ]}
+};
+if(prefs.theme==='pop')prefs.theme='mario';
+prefs.pieces=Object.assign({neon:[0,2],mario:[0,1],classic:[0,0]},prefs.pieces||{});
+const curTheme=()=>document.documentElement.dataset.theme||'classic';
+function pieceSVG(kind){                                  // kind：'m0'/'m1'＝玩家棋子、'r'＝暫時棋子
+  const P=PIECES[curTheme()]||PIECES.classic;if(kind==='r')return P.run;
+  const p=+kind[1],i=(prefs.pieces[curTheme()]||[])[p]||0;return(P.set[i]||P.set[0]).s;
+}
+function refreshSkins(){
+  $$('#pieces .piece').forEach(el=>{el.querySelector('.shape').innerHTML=pieceSVG(el.dataset.kind);});
+  if(G.st&&!$('#game').classList.contains('hidden'))renderPlayers();
+  renderPiecePicker();
+}
+function renderPiecePicker(){
+  const th=curTheme(),P=PIECES[th],one=P.set.length<2;
+  $('#pieceNote').classList.toggle('hidden',!one);$('#pieceRows').classList.toggle('hidden',one);
+  if(one)return;
+  $('#pieceRows').innerHTML=[0,1].map(p=>`<div class="prow"><span class="t-p${p+1} text-xs font-bold w-16 shrink-0">${p?'玩家 2 / AI':'玩家 1'}</span><div class="pick" style="--c:var(--p${p+1})">${
+    P.set.map((x,i)=>`<button data-p="${p}" data-i="${i}" class="${(prefs.pieces[th][p]||0)===i?'on':''}" title="${x.n}" aria-label="${x.n}">${x.s}</button>`).join('')}</div></div>`).join('');
+}
+$('#pieceRows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const th=curTheme();
+  prefs.pieces[th]=[...(prefs.pieces[th]||[0,1])];prefs.pieces[th][+b.dataset.p]=+b.dataset.i;store.set('cantstop.prefs.v1',prefs);refreshSkins();};
+
+/* ---- 畫面風格（皮膚全在 CSS 的 [data-theme] token 區塊） ---- */
 const THEMES=[
   {id:'classic',name:'原版桌遊',bar:'#eadbbc',sw:['#b3261e','#fff8e4','#23934f']},
   {id:'neon',name:'霓虹科技',bar:'#020617',sw:['#020617','#00d4ff','#ff2d95']},
-  {id:'pop',name:'POP 普普',bar:'#FFF1DC',sw:['#FFD447','#FF6FAE','#8EC9FF']}
+  {id:'mario',name:'磚塊冒險',bar:'#5c94fc',sw:['#5c94fc','#e52521','#fbd000']}
 ];
 function applyTheme(id){
   const t=THEMES.find(x=>x.id===id)||THEMES[0];
@@ -963,10 +1052,12 @@ function applyTheme(id){
   document.querySelector('meta[name=theme-color]').content=t.bar;
   $$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.theme===t.id));
   $('#btnTheme').title=`切換畫面風格（目前：${t.name}）`;
+  refreshSkins();
 }
 $('#themeSeg').innerHTML=THEMES.map(t=>`<button data-theme="${t.id}"><span class="sw">${t.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</span>${t.name}</button>`).join('');
 $('#themeSeg').onclick=e=>{const b=e.target.closest('button');if(b)applyTheme(b.dataset.theme);};
 $('#btnTheme').onclick=()=>{const i=THEMES.findIndex(t=>t.id===prefs.theme);applyTheme(THEMES[(i+1)%THEMES.length].id);};
+$$('[data-ic]').forEach(e=>{e.insertAdjacentHTML('afterbegin',IC[e.dataset.ic]);});
 
 /* ---- 新手教學：實際玩一回合（骰點固定），四片擋板圍出洞口，只有洞內可以點 ---- */
 const Tut={
@@ -1041,7 +1132,7 @@ $('#btnClear').onclick=e=>{
   stats={...STAT_DEF};store.set(STAT_KEY,stats);renderStats();
 };
 BGM.init();renderLobby();renderStats();applyTheme(prefs.theme);if(!prefs.tutDone)$('#btnTut').classList.add('nudge');
-window.__cs={G,Rules,AI,startGame,applyTheme,Tut};
+window.__cs={G,Rules,AI,startGame,applyTheme,Tut,PIECES,prefs};
 }
 else{module.exports={Rules,AI,COLS,H};}
 </script>
