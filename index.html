@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>欲罷不能 Can't Stop</title>
+<meta name="description" content="經典桌遊《欲罷不能》(Can't Stop) 網頁版：五階 AI、本地雙人、霓虹科技風。">
+<meta name="theme-color" content="#020617">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+:root{
+  --p1:#39ff14; --p2:#ff2d95; --run:#00d4ff; --danger:#ff3b3b; --pa:#00d4ff; --pb:#c084fc;
+  --cw:clamp(30px,4.4vw,56px); --ch:clamp(22px,5.2vh,42px); --ds:58px;
+}
+@media (max-width:1023px){ :root{ --cw:min(8.2vw,46px); --ch:clamp(18px,3.3vh,30px); --ds:52px; } }
+*{-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#020617;color:#e2e8f0;overflow-x:hidden}
+.orb{font-family:'Orbitron','Noto Sans TC',sans-serif}
+/* ---------- 背景 ---------- */
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(60vw 40vh at 12% 0%,rgba(57,255,20,.10),transparent 70%),
+   radial-gradient(60vw 45vh at 92% 8%,rgba(255,45,149,.12),transparent 70%),
+   radial-gradient(70vw 50vh at 50% 110%,rgba(0,212,255,.14),transparent 70%),#020617}
+#bg::after{content:'';position:absolute;inset:0;opacity:.35;
+  background-image:linear-gradient(rgba(0,212,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.10) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 40%,#000 10%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 10%,transparent 75%)}
+.panel{background:linear-gradient(160deg,rgba(15,23,42,.88),rgba(2,6,23,.88));border:1px solid rgba(100,116,139,.28);border-radius:16px;
+  box-shadow:0 0 0 1px rgba(0,212,255,.05),0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
+.neon-title{color:#fff;text-shadow:0 0 6px #fff,0 0 18px var(--run),0 0 42px var(--run),0 0 80px rgba(0,212,255,.6);animation:flicker 5s infinite}
+@keyframes flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.72}}
+.t-p1{color:var(--p1);text-shadow:0 0 10px rgba(57,255,20,.7)}
+.t-p2{color:var(--p2);text-shadow:0 0 10px rgba(255,45,149,.7)}
+.t-run{color:var(--run);text-shadow:0 0 10px rgba(0,212,255,.7)}
+/* ---------- 按鈕 ---------- */
+.btn{position:relative;border-radius:12px;font-weight:700;letter-spacing:.04em;padding:.8rem 1rem;transition:transform .15s,box-shadow .2s,filter .2s,opacity .2s;border:1px solid transparent;user-select:none}
+.btn:not(:disabled):hover{transform:translateY(-2px)}
+.btn:not(:disabled):active{transform:translateY(1px) scale(.98)}
+.btn:disabled{opacity:.32;cursor:not-allowed;filter:grayscale(.6)}
+.btn-roll{background:linear-gradient(135deg,#0891b2,#00d4ff);color:#020617;box-shadow:0 0 18px rgba(0,212,255,.55),inset 0 0 12px rgba(255,255,255,.25)}
+.btn-stop{background:rgba(2,6,23,.6);color:var(--p1);border-color:var(--p1);box-shadow:0 0 14px rgba(57,255,20,.35),inset 0 0 10px rgba(57,255,20,.12)}
+.btn-start{background:linear-gradient(135deg,#39ff14,#00d4ff);color:#020617;box-shadow:0 0 26px rgba(57,255,20,.5)}
+.btn-ghost{background:rgba(15,23,42,.7);border-color:rgba(100,116,139,.45);color:#cbd5e1}
+.btn-ghost:hover{border-color:var(--run);color:#fff}
+.btn-sm{padding:.34rem .75rem}.btn-md{padding:.5rem .75rem}.sel-sm{padding:.28rem .5rem;max-width:132px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:14px;background:rgba(2,6,23,.7);border:1px solid rgba(100,116,139,.3)}
+.seg button{border-radius:10px;padding:.7rem .5rem;font-weight:700;color:#94a3b8;transition:all .2s}
+.seg button.on{background:rgba(0,212,255,.14);color:#fff;box-shadow:0 0 0 1px var(--run),0 0 16px rgba(0,212,255,.4)}
+select,.sel{background:#0b1224;border:1px solid rgba(100,116,139,.45);border-radius:10px;color:#e2e8f0;padding:.5rem .6rem;outline:none}
+select:focus{border-color:var(--run);box-shadow:0 0 0 2px rgba(0,212,255,.25)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--run) var(--v,60%),#334155 var(--v,60%));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--run);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--run);cursor:pointer}
+/* ---------- BGM ---------- */
+#bgm{position:fixed;top:10px;right:10px;z-index:60;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px}
+#bgmPlay{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(0,212,255,.12);border:1px solid var(--run);color:var(--run);box-shadow:0 0 10px rgba(0,212,255,.35);transition:all .2s}
+#bgmPlay.on{background:var(--run);color:#020617;box-shadow:0 0 18px var(--run)}
+.eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq i{width:3px;background:var(--run);border-radius:2px;height:3px}
+.eq.on i{animation:eq 1s ease-in-out infinite}.eq.on i:nth-child(2){animation-delay:.2s}.eq.on i:nth-child(3){animation-delay:.45s}
+@keyframes eq{0%,100%{height:3px}50%{height:14px}}
+/* ---------- 大廳統計 ---------- */
+.stat{border-radius:14px;padding:14px 12px;background:rgba(2,6,23,.65);border:1px solid rgba(100,116,139,.25);text-align:center;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--c,var(--run));box-shadow:0 0 12px var(--c,var(--run))}
+.stat b{display:block;font-family:'Orbitron',sans-serif;font-size:1.9rem;line-height:1.1;color:var(--c,var(--run));text-shadow:0 0 12px var(--c,var(--run))}
+.stat span{font-size:.74rem;color:#94a3b8}
+.stat small{display:block;font-size:.66rem;color:#64748b;margin-top:2px}
+/* ---------- 遊戲版面 ---------- */
+#gameGrid{display:grid;gap:12px;grid-template-areas:"players" "board" "ctrl"}
+@media (min-width:1024px){#gameGrid{grid-template-columns:minmax(0,1fr) 410px;grid-template-rows:auto 1fr;grid-template-areas:"board players" "board ctrl";gap:16px}}
+#players{grid-area:players}#boardWrap{grid-area:board}#ctrl{grid-area:ctrl}
+.pcard{border-radius:14px;padding:10px 12px;border:1px solid rgba(100,116,139,.25);background:rgba(2,6,23,.6);transition:all .3s;opacity:.55}
+.pcard.active{opacity:1}
+.pcard.p0.active{border-color:var(--p1);box-shadow:0 0 18px rgba(57,255,20,.3),inset 0 0 18px rgba(57,255,20,.08)}
+.pcard.p1.active{border-color:var(--p2);box-shadow:0 0 18px rgba(255,45,149,.3),inset 0 0 18px rgba(255,45,149,.08)}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:#0b1224;border:2px solid var(--c);box-shadow:0 0 10px var(--c);flex:none}
+.avatar.breath{animation:breath 1.5s ease-in-out infinite}
+@keyframes breath{0%,100%{box-shadow:0 0 4px var(--c),0 0 0 0 rgba(255,45,149,.0)}50%{box-shadow:0 0 22px var(--c),0 0 0 7px rgba(255,45,149,.18)}}
+.peak{width:14px;height:14px;clip-path:polygon(50% 0,100% 100%,0 100%);background:#1e293b;transition:all .3s}
+.peak.on{background:var(--c);filter:drop-shadow(0 0 6px var(--c))}
+.dots::after{content:'';animation:dots 1.2s steps(4,end) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+/* ---------- 棋盤 ---------- */
+#board{position:relative;padding:34px 6px}
+#cols{position:relative;display:flex;align-items:center;height:calc(var(--ch)*13);width:calc(var(--cw)*11)}
+.col{position:relative;width:var(--cw);display:flex;flex-direction:column-reverse}
+.col::before{content:'';position:absolute;inset:-5px 1px;border-radius:10px;border:1.5px solid transparent;transition:all .18s;pointer-events:none}
+.col.has-run::before{border-color:rgba(0,212,255,.25)}
+.col.preview::before{border-color:var(--run);box-shadow:0 0 16px var(--run),inset 0 0 16px rgba(0,212,255,.28);background:rgba(0,212,255,.06)}
+.col .lab{position:absolute;left:0;right:0;text-align:center;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(11px,1.2vw,15px);color:#64748b;transition:all .2s}
+.col .lab.t{top:-27px}.col .lab.b{bottom:-27px}
+.col.preview .lab,.col.has-run .lab{color:var(--run);text-shadow:0 0 8px var(--run)}
+.cell{height:var(--ch);padding:2px}
+.cell i{display:block;width:100%;height:100%;border-radius:6px;background:rgba(15,23,42,.9);border:1px solid rgba(71,85,105,.5);transition:all .25s}
+.cell.top i{border-color:rgba(250,204,21,.55);background:linear-gradient(180deg,rgba(250,204,21,.16),rgba(15,23,42,.9))}
+.cell.target i{border-color:var(--run);background:rgba(0,212,255,.25);box-shadow:0 0 12px var(--run);animation:tgt .7s ease-in-out infinite alternate}
+@keyframes tgt{to{background:rgba(0,212,255,.45)}}
+.col.c0 .cell i{background:rgba(57,255,20,.16);border-color:rgba(57,255,20,.55);box-shadow:inset 0 0 8px rgba(57,255,20,.25)}
+.col.c1 .cell i{background:rgba(255,45,149,.16);border-color:rgba(255,45,149,.55);box-shadow:inset 0 0 8px rgba(255,45,149,.25)}
+.col.c0 .lab{color:var(--p1);text-shadow:0 0 8px var(--p1)}.col.c1 .lab{color:var(--p2);text-shadow:0 0 8px var(--p2)}
+.col.justclaimed{animation:claimed 1s ease-out}
+@keyframes claimed{0%{filter:brightness(3) saturate(1.5)}100%{filter:none}}
+#pieces{position:absolute;inset:0;pointer-events:none}
+.piece{position:absolute;width:var(--sz);height:var(--sz);margin-left:calc(var(--sz)/-2);margin-bottom:calc(var(--sz)/-2);
+  left:calc(var(--cw)*(var(--i) + .5 + var(--dx)));bottom:calc(var(--ch)*var(--s));
+  transition:left .45s cubic-bezier(.4,0,.2,1),bottom .45s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:1}
+.piece.pre,.piece.gone{opacity:0}
+.piece.landed{animation:land .38s cubic-bezier(.3,1.6,.5,1)}
+@keyframes land{0%{transform:translateY(0)}40%{transform:translateY(-38%) scale(1.12)}70%{transform:translateY(0) scale(.94,1.06)}100%{transform:none}}
+.marker{--sz:calc(var(--cw)*.36);z-index:2}
+.marker .shape{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--c) 45%);box-shadow:0 0 6px var(--c),0 0 14px var(--c)}
+.marker.p0{--c:var(--p1)}.marker.p1{--c:var(--p2)}
+.marker.crown{--sz:calc(var(--cw)*.5)}
+.runner{--sz:calc(var(--cw)*.46);z-index:3}
+.runner .shape{width:100%;height:100%;transform:rotate(45deg) scale(.82);border-radius:22%;background:radial-gradient(circle at 40% 40%,#fff,var(--run) 55%);box-shadow:0 0 8px var(--run),0 0 20px var(--run),0 0 34px rgba(0,212,255,.6);animation:runpulse 1.2s ease-in-out infinite}
+@keyframes runpulse{50%{box-shadow:0 0 5px var(--run),0 0 12px var(--run)}}
+.piece.busting{animation:bustfx 1.25s ease-in forwards;transition:none}
+.piece.busting .shape{background:radial-gradient(circle at 40% 40%,#fff,var(--danger) 50%);box-shadow:0 0 10px var(--danger),0 0 28px var(--danger),0 0 50px var(--danger);animation:none}
+@keyframes bustfx{0%{opacity:1;transform:scale(1)}12%{transform:scale(1.5);filter:brightness(2)}24%{opacity:.35;transform:scale(1)}36%{opacity:1;transform:scale(1.4);filter:brightness(2)}48%{opacity:.35}60%{opacity:1;transform:scale(1.25)}100%{opacity:0;transform:scale(.2) translateY(24px);filter:blur(3px)}}
+.shake{animation:shake .55s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-7px,2px) rotate(-.3deg)}40%,60%{transform:translate(7px,-1px) rotate(.3deg)}}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;box-shadow:inset 0 0 160px 40px rgba(255,59,59,.55)}
+#vignette.on{animation:vig 1.2s ease-out}
+@keyframes vig{0%{opacity:0}12%{opacity:1}30%{opacity:.3}45%{opacity:.9}100%{opacity:0}}
+#flash{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5}
+#flash span{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(34px,7vw,76px);letter-spacing:.08em;opacity:0;color:var(--fc);text-shadow:0 0 12px var(--fc),0 0 40px var(--fc)}
+#flash.on span{animation:flash 1.3s ease-out}
+@keyframes flash{0%{opacity:0;transform:scale(2.2)}18%{opacity:1;transform:scale(1)}70%{opacity:1}100%{opacity:0;transform:scale(.92) translateY(-12px)}}
+/* ---------- 骰子 ---------- */
+#dice{display:flex;justify-content:center;gap:16px;padding:16px 0 12px}
+.die{width:var(--ds);height:var(--ds);perspective:520px;transition:filter .2s}
+.die.rolling{animation:hop .6s cubic-bezier(.3,.6,.4,1)}
+@keyframes hop{0%{transform:translate(var(--jx),-34px) scale(.8);filter:blur(3.5px)}30%{transform:translate(calc(var(--jx)*-.4),8px) scale(1.04);filter:blur(3px)}55%{transform:translate(calc(var(--jx)*.2),-12px);filter:blur(1.6px)}80%{transform:translate(0,3px);filter:blur(.5px)}100%{transform:none;filter:blur(0)}}
+.tilt{width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(-16deg) rotateY(14deg)}
+.cube{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(var(--ex,0deg)) rotateY(var(--ey,0deg))}
+.cube.spin{animation:spin .6s cubic-bezier(.15,.65,.3,1) both}
+@keyframes spin{from{transform:rotateX(var(--sx)) rotateY(var(--sy)) rotateZ(var(--sz))}to{transform:rotateX(var(--ex)) rotateY(var(--ey)) rotateZ(0deg)}}
+.cube.tumble{animation:tumble 1.3s linear infinite}
+@keyframes tumble{from{transform:rotateX(0) rotateY(0) rotateZ(0)}to{transform:rotateX(360deg) rotateY(720deg) rotateZ(360deg)}}
+.face{position:absolute;inset:0;border-radius:12px;background:linear-gradient(145deg,#16213d,#060b19);border:1.5px solid var(--dc,#475569);
+  box-shadow:inset 0 0 12px rgba(0,212,255,.18);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:16%;transition:border-color .2s,box-shadow .2s}
+.face b{width:72%;height:72%;margin:auto;border-radius:50%;background:var(--dp,#e2e8f0);box-shadow:0 0 6px var(--dp,#e2e8f0);visibility:hidden}
+.face b.on{visibility:visible}
+.f1{transform:translateZ(calc(var(--ds)/2))}.f6{transform:rotateY(180deg) translateZ(calc(var(--ds)/2))}
+.f2{transform:rotateY(90deg) translateZ(calc(var(--ds)/2))}.f5{transform:rotateY(-90deg) translateZ(calc(var(--ds)/2))}
+.f3{transform:rotateX(90deg) translateZ(calc(var(--ds)/2))}.f4{transform:rotateX(-90deg) translateZ(calc(var(--ds)/2))}
+.die.pa{--dc:var(--pa);--dp:var(--pa)}.die.pb{--dc:var(--pb);--dp:var(--pb)}
+.die.pa .face{box-shadow:0 0 14px var(--pa),inset 0 0 12px rgba(0,212,255,.3)}
+.die.pb .face{box-shadow:0 0 14px var(--pb),inset 0 0 12px rgba(192,132,252,.3)}
+/* ---------- 組合卡片 ---------- */
+#combos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-height:92px}
+.combo-empty{grid-column:1/-1;display:grid;place-items:center;border:1px dashed rgba(100,116,139,.35);border-radius:12px;color:#64748b;font-size:.8rem}
+.combo{border-radius:12px;padding:8px 4px 6px;text-align:center;background:rgba(2,6,23,.75);border:1px solid rgba(0,212,255,.35);transition:all .18s;animation:cardin .35s both}
+.combo:nth-child(2){animation-delay:.07s}.combo:nth-child(3){animation-delay:.14s}
+@keyframes cardin{from{opacity:0;transform:translateY(12px) scale(.95)}}
+.combo[data-play]{cursor:pointer}
+.live .combo[data-play]:hover,.combo.ai-pick{transform:translateY(-4px);border-color:var(--run);box-shadow:0 0 18px rgba(0,212,255,.55),inset 0 0 14px rgba(0,212,255,.15)}
+.combo.disabled{opacity:.35;border-color:rgba(100,116,139,.3)}
+.combo .row{display:flex;align-items:flex-start;justify-content:center;gap:4px}
+.combo .amp{color:#475569;font-weight:700;padding-top:6px}
+.num{display:flex;flex-direction:column;align-items:center;min-width:42px;border-radius:9px;padding:2px 4px;border:1px solid transparent;transition:all .15s}
+.num b{font-family:'Orbitron',sans-serif;font-size:1.45rem;line-height:1.25}
+.num small{font-size:.62rem;line-height:1.1;white-space:nowrap}
+.num.ok b{color:#fff;text-shadow:0 0 10px var(--run)}.num.ok small{color:var(--run)}
+.num.bad b{color:#475569;text-decoration:line-through}.num.bad small{color:#f87171}
+.combo.choose .num{cursor:pointer;border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.06)}
+.live .combo.choose .num:hover,.num.ai-pick{border-color:var(--run);background:rgba(0,212,255,.2);box-shadow:0 0 12px var(--run)}
+.combo .sub{font-size:.62rem;color:#94a3b8;margin-top:4px;line-height:1.2}
+.rpip{width:13px;height:13px;transform:rotate(45deg);border-radius:3px;background:#1e293b;border:1px solid #334155;transition:all .3s}
+.rpip.on{background:var(--run);border-color:var(--run);box-shadow:0 0 10px var(--run)}
+#gaugeBar{height:100%;border-radius:99px;transition:width .4s,background .4s}
+/* ---------- 遮罩 ---------- */
+.overlay{position:fixed;inset:0;z-index:80;display:none;place-items:center;background:rgba(2,6,23,.94);backdrop-filter:blur(10px);padding:20px}
+.overlay.on{display:grid;animation:ovin .3s}
+@keyframes ovin{from{opacity:0}}
+.pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.8)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}.neon-title{animation:none}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="vignette"></div>
+
+<!-- ===== BGM 控制 ===== -->
+<div id="bgm" class="panel">
+  <button id="bgmPlay" title="播放 / 暫停" aria-label="播放或暫停背景音樂">
+    <svg id="icoPlay" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
+    <svg id="icoPause" class="hidden" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+  </button>
+  <div class="eq" id="eq"><i></i><i></i><i></i></div>
+  <select id="bgmTrack" class="text-xs sel-sm" aria-label="選擇音樂"></select>
+  <input id="bgmVol" type="range" min="0" max="100" value="60" class="w-16 sm:w-20" aria-label="音量">
+  <span id="bgmSrc" class="hidden sm:inline text-[10px] text-slate-500 w-8"></span>
+</div>
+<audio id="bgmAudio" preload="none" loop></audio>
+
+<!-- ===== 大廳 ===== -->
+<main id="lobby" class="min-h-full px-4 pt-20 pb-10">
+  <div class="mx-auto max-w-4xl">
+    <div class="text-center mb-8">
+      <h1 class="orb neon-title text-5xl sm:text-7xl font-black tracking-wider">CAN'T STOP</h1>
+      <p class="mt-3 text-lg tracking-[.5em] text-slate-300">欲 罷 不 能</p>
+      <p class="mt-1 text-xs text-slate-500">再擲一次？還是見好就收？——搶先攻下 3 座山頭的人獲勝</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <section class="panel p-5 space-y-4">
+        <h2 class="orb text-sm tracking-widest t-run">GAME MODE</h2>
+        <div class="seg" id="modeSeg">
+          <button data-mode="ai">🤖 單人對抗 AI</button>
+          <button data-mode="local">👥 雙人本地對戰</button>
+        </div>
+        <div id="aiBox">
+          <label class="text-xs text-slate-400 block mb-1">AI 對手難度</label>
+          <select id="aiLevel" class="w-full"></select>
+          <p id="aiDesc" class="text-xs text-slate-400 mt-2 min-h-[2.5em]"></p>
+        </div>
+        <div id="localBox" class="hidden text-xs text-slate-400 leading-relaxed">
+          Pass &amp; Play：同一台裝置輪流操作，回合交替時會跳出全螢幕提示再交給下一位。
+        </div>
+        <button id="btnStart" class="btn btn-start w-full orb text-lg">START ▶</button>
+        <details class="text-xs text-slate-400">
+          <summary class="cursor-pointer text-slate-300">規則速覽</summary>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>擲 4 顆骰子，兩兩分組得到 2 個和（2–12），對應賽道的<span class="t-run">暫時棋子</span>各前進 1 步。</li>
+            <li>每回合最多 3 顆暫時棋子；可一直擲，也可隨時「收手」把進度存成自己的棋子。</li>
+            <li>擲出的分組全都走不了 = <span class="text-red-400">爆掉</span>，本回合進度全部歸零。</li>
+            <li>收手時棋子在頂端即封頂該賽道；先封頂 3 條者獲勝。</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="panel p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="orb text-sm tracking-widest t-run">DASHBOARD</h2>
+          <button id="btnClear" class="btn btn-ghost btn-sm text-xs">清除戰績</button>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="statGrid"></div>
+        <div class="mt-3">
+          <div class="flex justify-between text-[11px] text-slate-400 mb-1"><span class="t-p1">玩家 1</span><span id="wrTxt">—</span><span class="t-p2">玩家 2 / AI</span></div>
+          <div class="h-2 rounded-full overflow-hidden flex bg-slate-800"><div id="wr1" style="width:50%;background:var(--p1);box-shadow:0 0 10px var(--p1)"></div><div id="wr2" style="width:50%;background:var(--p2)"></div></div>
+        </div>
+      </section>
+    </div>
+    <p class="text-center text-[10px] text-slate-600 mt-6">Music: Kevin MacLeod (incompetech.com) — Licensed under CC BY 4.0 · 串流失敗時自動改用內建合成器</p>
+  </div>
+</main>
+
+<!-- ===== 遊戲 ===== -->
+<main id="game" class="hidden min-h-full px-2 sm:px-4 pt-16 pb-6">
+  <div class="fixed top-[10px] left-[10px] z-50 flex items-center gap-3">
+    <button id="btnBack" class="btn btn-ghost btn-md text-xs">← 大廳</button>
+    <span class="orb hidden md:inline text-sm tracking-widest text-slate-400">CAN'T STOP</span>
+  </div>
+  <div id="gameGrid" class="mx-auto max-w-6xl">
+    <div id="players" class="grid grid-cols-2 gap-2"></div>
+
+    <div id="boardWrap" class="panel p-2 sm:p-4 flex justify-center items-center">
+      <div id="board"><div id="cols"><div id="pieces"></div></div><div id="flash"><span></span></div></div>
+    </div>
+
+    <div id="ctrl" class="panel p-3 sm:p-4">
+      <div id="status" class="text-center text-sm font-medium min-h-[1.5em]"></div>
+      <div id="dice"></div>
+      <div class="flex items-center justify-between gap-3 mb-3 text-xs">
+        <div class="flex items-center gap-2"><span class="text-slate-400">暫時棋子</span><span id="rpips" class="flex gap-2 px-1"></span><span id="rleft" class="orb t-run"></span></div>
+        <div class="flex items-center gap-2 flex-1 max-w-[190px]"><span class="text-slate-400 whitespace-nowrap">爆掉機率</span>
+          <div class="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden"><div id="gaugeBar" style="width:0"></div></div>
+          <span id="gaugeTxt" class="orb w-9 text-right">0%</span></div>
+      </div>
+      <div id="combos"></div>
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <button id="btnRoll" class="btn btn-roll">🎲 擲骰</button>
+        <button id="btnStop" class="btn btn-stop">✋ 收手</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== 遮罩 ===== -->
+<div id="passOv" class="overlay"><div class="text-center pop">
+  <p id="passSub" class="text-slate-400 mb-4"></p>
+  <h2 id="passTitle" class="orb text-4xl sm:text-6xl font-black mb-3"></h2>
+  <p class="text-slate-400 mb-8">請將裝置交給下一位玩家</p>
+  <button id="passOk" class="btn btn-start orb px-10">READY ▶</button>
+</div></div>
+<div id="winOv" class="overlay"><div class="text-center pop max-w-md">
+  <div class="text-6xl mb-3">🏆</div>
+  <h2 id="winTitle" class="orb text-4xl sm:text-5xl font-black mb-2"></h2>
+  <p id="winSub" class="text-slate-400 mb-8"></p>
+  <div class="grid grid-cols-2 gap-3"><button id="btnAgain" class="btn btn-start">再來一局</button><button id="btnLobby" class="btn btn-ghost">回大廳</button></div>
+</div></div>
+
+<script>
+'use strict';
+/* =====================================================================
+ * 1. 規則核心 Rules —— 純邏輯、不碰 DOM；AI 模式與本地雙人共用
+ * ===================================================================== */
+const COLS=[2,3,4,5,6,7,8,9,10,11,12];
+const H={2:3,3:5,4:7,5:9,6:11,7:13,8:11,9:9,10:7,11:5,12:3};
+const SPLITS=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+const ROLL_DICE=[],ROLL_MASKS=[];
+for(let a=1;a<=6;a++)for(let b=1;b<=6;b++)for(let c=1;c<=6;c++)for(let d=1;d<=6;d++){
+  const dd=[a,b,c,d];let m=0;
+  for(const sp of SPLITS)for(const pr of sp)m|=1<<(dd[pr[0]]+dd[pr[1]]);
+  ROLL_DICE.push(dd);ROLL_MASKS.push(m);
+}
+
+const Rules={
+  newState(mode,aiLevel){
+    return{mode,aiLevel,current:0,perm:[{},{}],claimed:{},runners:{},dice:[1,2,3,4],phase:'start',options:[],winner:null};
+  },
+  free(st,runners=st.runners){return 3-Object.keys(runners).length;},
+  claimedCount(st,p){return COLS.filter(c=>st.claimed[c]===p).length;},
+  /** 單一點數在指定 runners 狀態下能否前進：ok / claimed(已封頂) / top(暫時棋子已達頂) / norunner(無棋子可放) */
+  status(st,col,runners){
+    if(st.claimed[col]!==undefined)return'claimed';
+    if(col in runners)return runners[col]>=H[col]?'top':'ok';
+    return this.free(st,runners)>0?'ok':'norunner';
+  },
+  /** 模擬走完一組點數後的 runners（不改動 st） */
+  sim(st,runners,cols){
+    const r={...runners},perm=st.perm[st.current];
+    for(const c of cols){if(c in r)r[c]++;else r[c]=(perm[c]||0)+1;}
+    return r;
+  },
+  /** 四顆骰子 → 最多 3 種不重複分組；plays 為該分組可執行的走法（choose=只剩 1 顆棋子需二擇一） */
+  options(st,dice){
+    const out=[],seen=new Set();
+    for(const sp of SPLITS){
+      let pa=sp[0],pb=sp[1],a=dice[pa[0]]+dice[pa[1]],b=dice[pb[0]]+dice[pb[1]];
+      if(a>b){[a,b]=[b,a];[pa,pb]=[pb,pa];}
+      const key=a+'-'+b;if(seen.has(key))continue;seen.add(key);
+      const r0=st.runners,sA=this.status(st,a,r0);
+      let sB,plays=[],choose=false;
+      if(sA==='ok'){
+        sB=this.status(st,b,this.sim(st,r0,[a]));
+        if(sB==='ok')plays=[[a,b]];
+        else if(sB==='norunner'&&a!==b&&this.status(st,b,r0)==='ok'){choose=true;sB='ok';plays=[[a],[b]];}
+        else plays=[[a]];
+      }else{sB=this.status(st,b,r0);if(sB==='ok')plays=[[b]];}
+      out.push({sums:[a,b],dice:[pa,pb],status:[sA,sB],plays,choose});
+    }
+    return out;
+  },
+  applyPlay(st,cols){st.runners=this.sim(st,st.runners,cols);},
+  legalMask(st,runners=st.runners){
+    const free=this.free(st,runners);let m=0;
+    for(const c of COLS){
+      if(st.claimed[c]!==undefined)continue;
+      if(c in runners){if(runners[c]<H[c])m|=1<<c;}
+      else if(free>0)m|=1<<c;
+    }
+    return m;
+  },
+  /** 下一次擲骰爆掉機率（窮舉 1296 種結果） */
+  bustProb(st,runners=st.runners){
+    const m=this.legalMask(st,runners);let bust=0;
+    for(const rm of ROLL_MASKS)if(!(rm&m))bust++;
+    return bust/1296;
+  },
+  wouldWin(st,runners=st.runners){
+    let n=this.claimedCount(st,st.current);
+    for(const c in runners)if(runners[c]>=H[c])n++;
+    return n>=3;
+  },
+  stop(st){
+    const cur=st.current,opp=1-cur,claimedNow=[];
+    for(const k in st.runners){
+      const c=+k;st.perm[cur][c]=st.runners[c];
+      if(st.runners[c]>=H[c]){st.claimed[c]=cur;delete st.perm[opp][c];claimedNow.push(c);}
+    }
+    st.runners={};
+    if(this.claimedCount(st,cur)>=3)st.winner=cur;
+    return{claimedNow,winner:st.winner};
+  },
+  bust(st){st.runners={};},
+  rollDice(){return[0,0,0,0].map(()=>1+Math.floor(Math.random()*6));}
+};
+
+/* =====================================================================
+ * 2. AI —— 五個智慧階層
+ * ===================================================================== */
+const LEVELS=[null,
+  {zh:'極度膽小',en:'Timid',desc:'有賺就收：只要任何棋子前進 1 步就立刻收手，幾乎不會爆掉。分組隨機。'},
+  {zh:'穩健新手',en:'Cautious',desc:'用滿 2 顆暫時棋子，或任一棋子前進 2 步才收手。'},
+  {zh:'理性標準',en:'Rational',desc:'動態計算爆掉機率，超過 50% 就收手；分組優先推進現有的暫時棋子。'},
+  {zh:'激進專家',en:'Aggressive',desc:'賭徒心態：3 顆棋子用完且爆掉機率 ≥ 75% 才收手；偏好短賽道 2、3、11、12 爆發超車。'},
+  {zh:'機率大師',en:'Master',desc:'期望值演算：選擇讓後續爆掉率最低的分組；落後時極度激進，領先時精準卡位。'}
+];
+const AI={
+  rand(a){return a[Math.floor(Math.random()*a.length)];},
+  best(list,score){let bs=-Infinity,pool=[];for(const x of list){const s=score(x);if(s>bs+1e-9){bs=s;pool=[x];}else if(Math.abs(s-bs)<=1e-9)pool.push(x);}return this.rand(pool);},
+  /** 局勢評估：封頂數 + 未封頂賽道的進度比例 */
+  standing(st,p){let v=Rules.claimedCount(st,p);for(const c of COLS)if(st.claimed[c]===undefined)v+=.45*(st.perm[p][c]||0)/H[c];return v;},
+  lead(st){return this.standing(st,st.current)-this.standing(st,1-st.current);},
+  /** 一組走法的價值（Lv5 用） */
+  playValue(st,runners,play){
+    const r1=Rules.sim(st,runners,play),opp=st.perm[1-st.current];let v=0;
+    for(const c of new Set(play)){
+      const steps=r1[c]-(runners[c]??(st.perm[st.current][c]||0));
+      v+=steps/H[c]*(1+.5*r1[c]/H[c]);
+      if(r1[c]>=H[c])v+=.8+.6*(opp[c]||0)/H[c];       // 封頂 + 卡位（對手在此賽道的進度越多越值得搶）
+    }
+    if(Rules.wouldWin(st,r1))v+=100;
+    return{v,r1};
+  },
+  pickPlay(st,opts){
+    const flat=[];opts.forEach((o,i)=>o.plays.forEach((play,k)=>flat.push({i,k,play})));
+    const lv=st.aiLevel,R=st.runners;
+    if(lv===1)return this.rand(flat);
+    if(lv===2)return this.best(flat,x=>x.play.length);
+    if(lv===3)return this.best(flat,x=>x.play.reduce((s,c)=>s+((c in R)?2:0)+1,0));
+    if(lv===4)return this.best(flat,x=>x.play.reduce((s,c)=>s+((c<=3||c>=11)?3:1)+((c in R)?.5:0),0));
+    const lead=this.lead(st),wP=lead>.5?4:lead<-.5?2:3;
+    return this.best(flat,x=>{const{v,r1}=this.playValue(st,R,x.play);return v-wP*Rules.bustProb(st,r1);});
+  },
+  shouldStop(st){
+    const lv=st.aiLevel,R=st.runners,perm=st.perm[st.current],p=Rules.bustProb(st);
+    const used=Object.keys(R).length,adv=Object.keys(R).map(c=>R[c]-(perm[c]||0));
+    const steps=adv.reduce((a,b)=>a+b,0),topped=Object.keys(R).filter(c=>R[c]>=H[c]).length;
+    if(Rules.wouldWin(st))return{stop:true,p,why:'已足夠獲勝'};
+    if(lv===1)return{stop:steps>=1,p};
+    if(lv===2)return{stop:used>=2||adv.some(a=>a>=2),p};
+    if(lv===3)return{stop:p>.5||(used===3&&p*steps>(1-p)*2),p};
+    if(lv===4)return{stop:used===3&&(p>=.75||(topped>0&&p>=.5)),p};
+    // Lv5：比較「爆掉損失」與「再擲一次的期望收益」，依局勢調整膽量
+    if(used<3&&p<.12)return{stop:false,p};
+    let risk=0;for(const c in R)risk+=(R[c]-(perm[c]||0))/H[c]+(R[c]>=H[c]?.6:0);
+    let gain=0;const tmp={...st};
+    for(const dd of ROLL_DICE){
+      let bv=0;for(const o of Rules.options(tmp,dd))for(const pl of o.plays){const v=this.playValue(st,R,pl).v;if(v>bv)bv=v;}
+      gain+=Math.min(bv,3);
+    }
+    gain/=1296;
+    const lead=this.lead(st),oppMatch=Rules.claimedCount(st,1-st.current)>=2;
+    let k=lead<-.5?1.7:lead>.5?.85:1.15;if(oppMatch&&lead<0)k=2.3;
+    return{stop:p*risk>gain*k,p};
+  }
+};
+
+/*__UI__*/
+if(typeof document!=='undefined'){
+/* =====================================================================
+ * 3. 音訊：BGM（串流 + 內建合成器備援）與音效
+ * ===================================================================== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const store={get(k,d){try{return{...d,...JSON.parse(localStorage.getItem(k)||'{}')};}catch(e){return{...d};}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const prefs=store.get('cantstop.prefs.v1',{mode:'ai',level:3,vol:60,track:0});
+
+const INC='https://incompetech.com/music/royalty-free/mp3-royaltyfree/';
+const TRACKS=[
+  {name:'Cyberpunk Synthwave',style:'synthwave',url:INC+'Neon%20Laser%20Horizon.mp3'},
+  {name:'Lofi Chill Beats',style:'lofi',url:INC+'Dreamy%20Flashback.mp3'},
+  {name:'Sci-Fi Ambient',style:'ambient',url:INC+'Floating%20Cities.mp3'}
+];
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+const Synth={
+  ctx:null,music:null,sfx:null,bus:null,timer:null,step:0,next:0,style:null,vol:.6,
+  ensure(){
+    if(!this.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return false;
+      this.ctx=new C();this.music=this.ctx.createGain();this.sfx=this.ctx.createGain();
+      this.music.connect(this.ctx.destination);this.sfx.connect(this.ctx.destination);this.setVol(this.vol);}
+    if(this.ctx.state==='suspended')this.ctx.resume();
+    return true;
+  },
+  setVol(v){this.vol=v;if(this.ctx){this.music.gain.value=v*.9;this.sfx.gain.value=v*.7;}},
+  tone(dest,t,f,dur,type,vol,cut,atk=.01,f2){
+    const c=this.ctx,o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();
+    o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    fl.type='lowpass';fl.frequency.value=cut||8000;
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+atk);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.05);
+  },
+  noise(dest,t,dur,vol,freq,type='highpass'){
+    const c=this.ctx,n=Math.floor(c.sampleRate*dur),buf=c.createBuffer(1,n,c.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+    const s=c.createBufferSource(),g=c.createGain(),fl=c.createBiquadFilter();s.buffer=buf;fl.type=type;fl.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    s.connect(fl);fl.connect(g);g.connect(dest);s.start(t);
+  },
+  start(style){
+    this.stop();if(!this.ensure())return;
+    this.style=style;this.bus=this.ctx.createGain();this.bus.connect(this.music);
+    this.step=0;this.next=this.ctx.currentTime+.08;this.timer=setInterval(()=>this.tick(),60);
+  },
+  stop(){clearInterval(this.timer);this.timer=null;if(this.bus){try{this.bus.disconnect();}catch(e){}this.bus=null;}},
+  tick(){const S=STYLES[this.style],spb=60/S.bpm/4;
+    while(this.next<this.ctx.currentTime+.25){S.on(this.step,this.next,spb,this,this.bus);this.step++;this.next+=spb;}},
+  kick(b,t,v=.5){this.tone(b,t,140,.2,'sine',v,1000,.005,42);}
+};
+const STYLES={
+  synthwave:{bpm:104,on(step,t,spb,S,b){
+    const bar=Math.floor(step/16)%4,s=step%16,root=[45,41,48,43][bar],third=[3,4,4,4][bar],ch=[0,7,12,12+third,19];
+    S.tone(b,t,mtof(root-12+(s%2?12:0)),spb*.9,'sawtooth',.17,650);
+    if(s%4===0)S.kick(b,t);
+    if(s%4===2)S.noise(b,t,.04,.05,7000);
+    if(s%8===4)S.noise(b,t,.14,.13,1800,'bandpass');
+    if(s%2===0)S.tone(b,t,mtof(root+12+ch[(s/2+bar)%5]),spb*1.8,'square',.045,2400);
+    if(s===0)for(const n of[0,third,7])S.tone(b,t,mtof(root+12+n),spb*15,'sawtooth',.035,1200,.4);
+  }},
+  lofi:{bpm:74,on(step,t,spb,S,b){
+    const bar=Math.floor(step/16)%4,s=step%16,sw=s%2?spb*.28:0;
+    const ch=[[50,53,57,60],[55,59,62,65],[48,52,55,59],[45,48,52,55]][bar];
+    if(s===0||s===7)for(const n of ch)S.tone(b,t+sw,mtof(n+12),spb*(s?6:9),'triangle',s?.045:.07,950,.04);
+    if(s===0)S.tone(b,t,mtof(ch[0]-12),spb*8,'sine',.16,400,.03);
+    if(s===0||s===10)S.kick(b,t,.4);
+    if(s===4||s===12)S.noise(b,t,.16,.09,1400,'bandpass');
+    if(s%2===0)S.noise(b,t+sw,.03,.025,6000);
+    if(Math.random()<.5)S.noise(b,t+Math.random()*spb,.012,.03,3000);
+    if(s%2===0&&Math.random()<.3){const pen=[0,2,4,7,9];S.tone(b,t+sw,mtof(72+pen[Math.floor(Math.random()*5)]),spb*3,'sine',.06,2000,.02);}
+  }},
+  ambient:{bpm:60,on(step,t,spb,S,b){
+    if(step%32===0){const root=[38,41,36,43][Math.floor(step/32)%4];
+      for(const n of[0,7,12,16,19])for(const dt of[-.08,.08])S.tone(b,t,mtof(root+12+n+dt),10,'sine',.04,1500,3.5);
+      S.tone(b,t,mtof(root),10,'triangle',.08,300,3);}
+    if(Math.random()<.09){const pen=[0,2,4,7,9,12];S.tone(b,t,mtof(74+pen[Math.floor(Math.random()*6)]),3,'sine',.035,4000,.02);}
+  }}
+};
+const SFX={
+  play(fn){if(Synth.vol<=0||!Synth.ensure())return;try{fn(Synth,Synth.sfx,Synth.ctx.currentTime);}catch(e){}},
+  roll(){this.play((S,b,t)=>{for(let i=0;i<7;i++)S.noise(b,t+i*.075+Math.random()*.02,.035,.22,2500,'bandpass');});},
+  step(){this.play((S,b,t)=>{S.tone(b,t+.4,520,.12,'square',.12,2500,.005,880);});},
+  pick(){this.play((S,b,t)=>S.tone(b,t,880,.08,'sine',.15,4000));},
+  bust(){this.play((S,b,t)=>{S.tone(b,t,320,.8,'sawtooth',.3,1200,.01,45);S.noise(b,t,.5,.25,400,'lowpass');});},
+  bank(){this.play((S,b,t)=>[523,659,784].forEach((f,i)=>S.tone(b,t+i*.09,f,.22,'triangle',.18,3000)));},
+  claim(){this.play((S,b,t)=>[523,659,784,1047].forEach((f,i)=>S.tone(b,t+.3+i*.1,f,.35,'square',.12,3000)));},
+  win(){this.play((S,b,t)=>[523,659,784,1047,1319,1568].forEach((f,i)=>S.tone(b,t+i*.13,f,.6,'triangle',.2,4000)));}
+};
+const BGM={
+  playing:false,source:'',req:0,to:null,audio:$('#bgmAudio'),
+  init(){
+    $('#bgmTrack').innerHTML=TRACKS.map((t,i)=>`<option value="${i}">${t.name}</option>`).join('');
+    $('#bgmTrack').value=prefs.track;$('#bgmVol').value=prefs.vol;this.applyVol();
+    $('#bgmPlay').onclick=()=>this.playing?this.pause():this.play();
+    $('#bgmTrack').onchange=e=>{prefs.track=+e.target.value;store.set('cantstop.prefs.v1',prefs);if(this.playing)this.play();};
+    $('#bgmVol').oninput=e=>{prefs.vol=+e.target.value;store.set('cantstop.prefs.v1',prefs);this.applyVol();};
+    this.ui();
+  },
+  applyVol(){const v=prefs.vol/100;this.audio.volume=v;Synth.setVol(v);$('#bgmVol').style.setProperty('--v',prefs.vol+'%');},
+  halt(){clearTimeout(this.to);this.audio.pause();Synth.stop();},
+  play(){
+    this.halt();this.playing=true;this.source='stream';Synth.ensure();
+    const tr=TRACKS[prefs.track],my=++this.req,a=this.audio;
+    const fallback=()=>{if(my!==this.req||!this.playing||this.source==='synth')return;a.pause();this.source='synth';Synth.start(tr.style);this.ui();};
+    a.onerror=fallback;a.src=tr.url;
+    a.play().catch(e=>{if(e&&e.name!=='AbortError')fallback();});
+    this.to=setTimeout(()=>{if(a.readyState<2)fallback();},9000);
+    this.ui();
+  },
+  pause(){this.req++;this.playing=false;this.halt();this.ui();},
+  ui(){
+    $('#bgmPlay').classList.toggle('on',this.playing);$('#eq').classList.toggle('on',this.playing);
+    $('#icoPlay').classList.toggle('hidden',this.playing);$('#icoPause').classList.toggle('hidden',!this.playing);
+    const el=$('#bgmSrc');el.textContent=!this.playing?'':this.source==='synth'?'SYNTH':'LIVE';
+    el.title=this.source==='synth'?'串流音源無法載入，使用內建合成器':'串流播放中';
+  }
+};
+
+/* =====================================================================
+ * 4. 戰績 Stats（LocalStorage）
+ * ===================================================================== */
+const STAT_KEY='cantstop.stats.v1',STAT_DEF={games:0,w0:0,w1:0,best:0,cur:0,b0:0,b1:0};
+let stats=store.get(STAT_KEY,STAT_DEF);
+function renderStats(){
+  const tiles=[['總遊玩場數',stats.games,'--run',''],['玩家 1 勝場',stats.w0,'--p1',''],['玩家 2 / AI 勝場',stats.w1,'--p2',''],
+    ['最高連勝紀錄',stats.best,'--p1',`目前連勝 ${stats.cur}`],['爆掉 Bust 次數',stats.b0+stats.b1,'--danger',`P1 ${stats.b0} · P2/AI ${stats.b1}`]];
+  $('#statGrid').innerHTML=tiles.map(([l,v,c,s],i)=>`<div class="stat ${i===4?'col-span-2 sm:col-span-2':''}" style="--c:var(${c})"><b>${v}</b><span>${l}</span>${s?`<small>${s}</small>`:''}</div>`).join('');
+  const tot=stats.w0+stats.w1,r=tot?stats.w0/tot*100:50;
+  $('#wr1').style.width=r+'%';$('#wr2').style.width=(100-r)+'%';
+  $('#wrTxt').textContent=tot?`勝率 ${Math.round(r)}% : ${100-Math.round(r)}%`:'尚無對戰紀錄';
+}
+
+/* =====================================================================
+ * 5. UI 渲染與流程控制（只讀寫 G.st，規則全部委派 Rules / AI）
+ * ===================================================================== */
+const G={st:null,token:0,aiMsg:'',thinking:false,showCards:false};
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+const FACE_ROT={1:[0,0],2:[0,-90],3:[-90,0],4:[90,0],5:[0,90],6:[0,180]};
+const LABEL={ok:'可走',claimed:'已封頂',top:'已達頂',norunner:'無棋子'};
+const isAI=()=>G.st.mode==='ai'&&G.st.current===1;
+const pname=p=>p===0?'玩家 1':G.st.mode==='ai'?'AI':'玩家 2';
+
+function buildDice(){
+  $('#dice').innerHTML=[0,1,2,3].map(()=>`<div class="die"><div class="tilt"><div class="cube">${[1,2,3,4,5,6].map(f=>
+    `<div class="face f${f}">${[0,1,2,3,4,5,6,7,8].map(i=>`<b class="${PIPS[f].includes(i)?'on':''}"></b>`).join('')}</div>`).join('')}</div></div></div>`).join('');
+  G.st.dice.forEach((v,i)=>setDie(i,v,false));
+}
+function setDie(i,v,anim){
+  const die=$$('.die')[i],cube=die.querySelector('.cube'),[x,y]=FACE_ROT[v],rnd=n=>Math.floor(Math.random()*n);
+  cube.classList.remove('spin','tumble');die.classList.remove('rolling','pa','pb');
+  cube.style.setProperty('--ex',x+'deg');cube.style.setProperty('--ey',y+'deg');
+  if(!anim)return;
+  cube.style.setProperty('--sx',(x+360*(2+rnd(2))*(rnd(2)?1:-1)+rnd(90))+'deg');
+  cube.style.setProperty('--sy',(y+360*(2+rnd(2))*(rnd(2)?1:-1)+rnd(90))+'deg');
+  cube.style.setProperty('--sz',(rnd(2)?1:-1)*(180+rnd(360))+'deg');
+  die.style.setProperty('--jx',(rnd(60)-30)+'px');
+  void die.offsetWidth;cube.classList.add('spin');die.classList.add('rolling');
+}
+function setTumble(on){$$('.cube').forEach(c=>{c.classList.remove('spin');c.classList.toggle('tumble',on);});}
+
+function buildBoard(){
+  const cols=$('#cols');cols.querySelectorAll('.col').forEach(e=>e.remove());
+  const layer=$('#pieces');layer.innerHTML='';
+  for(const c of COLS){
+    const el=document.createElement('div');el.className='col';el.dataset.col=c;
+    el.innerHTML=`<span class="lab t">${c}</span><span class="lab b">${c}</span>`+
+      Array.from({length:H[c]},(_,k)=>`<div class="cell ${k+1===H[c]?'top':''}" data-step="${k+1}"><i></i></div>`).join('');
+    cols.insertBefore(el,layer);
+  }
+}
+const colEl=c=>$(`.col[data-col="${c}"]`);
+function placePiece(el,col,step,dx){
+  el.style.setProperty('--i',col-2);el.style.setProperty('--s',(13-H[col])/2+step-.5);el.style.setProperty('--dx',dx);
+}
+function renderPieces(){
+  const st=G.st,layer=$('#pieces'),want=new Map();
+  for(const p of[0,1])for(const c of COLS){
+    const step=st.perm[p][c]||0;if(!step)continue;
+    const crown=st.claimed[c]===p;
+    want.set(`m${p}-${c}`,{cls:`piece marker p${p}${crown?' crown':''}`,col:c,step,dx:crown?0:(p?.24:-.24),from:0});
+  }
+  for(const k in st.runners){const c=+k;want.set(`r-${c}`,{cls:'piece runner',col:c,step:st.runners[c],dx:0,from:st.perm[st.current][c]||0});}
+  for(const el of[...layer.children]){
+    if(!el.dataset.key||want.has(el.dataset.key))continue;
+    el.dataset.key='';el.classList.add('gone');setTimeout(()=>el.remove(),320);
+  }
+  for(const[key,w]of want){
+    let el=layer.querySelector(`[data-key="${key}"]`);
+    if(!el){
+      el=document.createElement('div');el.dataset.key=key;el.className=w.cls+' pre';el.innerHTML='<div class="shape"></div>';
+      placePiece(el,w.col,w.from,w.dx);layer.appendChild(el);
+      el.addEventListener('transitionend',e=>{if(e.propertyName==='bottom'){el.classList.remove('landed');void el.offsetWidth;el.classList.add('landed');}});
+      el.addEventListener('animationend',e=>{if(e.animationName==='land')el.classList.remove('landed');});
+      void el.offsetWidth;
+    }
+    el.className=w.cls+(el.classList.contains('landed')?' landed':'');
+    placePiece(el,w.col,w.step,w.dx);
+  }
+}
+function renderCols(){
+  const st=G.st;
+  for(const c of COLS){const el=colEl(c);
+    el.classList.toggle('c0',st.claimed[c]===0);el.classList.toggle('c1',st.claimed[c]===1);el.classList.toggle('has-run',c in st.runners);}
+}
+function renderPlayers(){
+  const st=G.st;
+  $('#players').innerHTML=[0,1].map(p=>{
+    const ai=st.mode==='ai'&&p===1,act=st.current===p&&st.phase!=='over',n=Rules.claimedCount(st,p);
+    const sub=ai?`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh}`:(st.mode==='ai'?'YOU':'HUMAN');
+    const msg=act?(ai?(G.aiMsg||'AI 回合'):'行動中'):'等待中';
+    return`<div class="pcard p${p} ${act?'active':''}" style="--c:var(--p${p+1})"><div class="flex items-center gap-2">
+      <div class="avatar ${ai&&act?'breath':''}">${ai?'🤖':p?'🧗‍♀️':'🧗'}</div>
+      <div class="min-w-0 flex-1"><div class="font-bold text-sm t-p${p+1} truncate">${pname(p)} <span class="text-[10px] text-slate-500 font-normal">${sub}</span></div>
+      <div class="flex items-center gap-1 mt-1">${[0,1,2].map(i=>`<span class="peak ${i<n?'on':''}"></span>`).join('')}<span class="orb text-xs text-slate-400 ml-1">${n}/3</span></div></div></div>
+      <div class="text-[11px] mt-1.5 truncate ${act?'text-slate-200':'text-slate-500'} ${ai&&act&&G.thinking?'dots':''}">${msg}</div></div>`;
+  }).join('');
+}
+function renderCtrl(){
+  const st=G.st,human=!isAI()&&st.phase!=='over',free=Rules.free(st);
+  $('#btnRoll').disabled=!(human&&(st.phase==='start'||st.phase==='decide'));
+  $('#btnStop').disabled=!(human&&st.phase==='decide');
+  $('#btnRoll').textContent=st.phase==='decide'?'🎲 繼續擲骰':'🎲 擲骰';
+  $('#rpips').innerHTML=[0,1,2].map(i=>`<span class="rpip ${i<free?'on':''}"></span>`).join('');
+  $('#rleft').textContent=free;
+  const p=Rules.bustProb(st),pct=Math.round(p*100),bar=$('#gaugeBar');
+  bar.style.width=Math.max(pct,2)+'%';
+  const col=p<.25?'var(--p1)':p<.5?'#facc15':'var(--danger)';bar.style.background=col;bar.style.boxShadow=`0 0 8px ${col}`;
+  $('#gaugeTxt').textContent=pct+'%';$('#gaugeTxt').style.color=col;
+  const who=`<span class="t-p${st.current+1}">${pname(st.current)}</span>`;
+  const txt={start:`${who}：請擲骰`,rolling:'擲骰中…',choose:isAI()?`${who} 正在思考分組`:`${who}：選擇一組分組`,
+    decide:isAI()?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="text-red-400 font-bold">💥 爆掉了！本回合進度歸零</span>',
+    bank:`${who} 收手，進度已保存`,over:'遊戲結束'}[st.phase]||'';
+  $('#status').innerHTML=isAI()&&G.aiMsg&&st.phase!=='bust'?`<span class="t-p2 ${G.thinking?'dots':''}">${G.aiMsg}</span>`:txt;
+}
+function comboHTML(o,i){
+  const dis=!o.plays.length;
+  const num=k=>`<span class="num ${o.status[k]==='ok'?'ok':'bad'}" ${o.choose?`data-play="${k}" role="button" tabindex="0"`:''}><b>${o.sums[k]}</b><small>${LABEL[o.status[k]]}</small></span>`;
+  const[a,b]=o.sums,sub=dis?'無法行動':o.choose?'僅剩 1 顆棋子 · 點數字擇一':o.plays[0].length===2?(a===b?`${a} 號賽道前進 2 步`:'兩條賽道各進 1 步'):`僅 ${o.plays[0][0]} 號可走`;
+  return`<div class="combo ${dis?'disabled':''} ${o.choose?'choose':''}" data-i="${i}" ${!dis&&!o.choose?'data-play="0" role="button" tabindex="0"':''}>
+    <div class="row">${num(0)}<span class="amp">&amp;</span>${num(1)}</div><div class="sub">${sub}</div></div>`;
+}
+function renderCombos(){
+  const st=G.st,box=$('#combos');
+  box.classList.toggle('live',st.phase==='choose'&&!isAI());
+  box.innerHTML=st.phase==='choose'?st.options.map(comboHTML).join(''):'<div class="combo-empty">擲骰後，在此選擇兩兩分組</div>';
+}
+function renderAll(){renderPlayers();renderCols();renderPieces();renderCtrl();renderCombos();}
+
+/* ---- 預覽高亮（hover 組合卡 → 賽道外框發光 + 落點格 + 骰子配對著色） ---- */
+function clearPreview(){$$('.col.preview').forEach(e=>e.classList.remove('preview'));$$('.cell.target').forEach(e=>e.classList.remove('target'));$$('.die').forEach(d=>d.classList.remove('pa','pb'));}
+function showPreview(i,k){
+  clearPreview();const st=G.st,o=st.options[i];if(!o||!o.plays[k])return;
+  const r1=Rules.sim(st,st.runners,o.plays[k]);
+  for(const c of new Set(o.plays[k])){const el=colEl(c);el.classList.add('preview');el.querySelector(`[data-step="${r1[c]}"]`)?.classList.add('target');}
+  const dice=$$('.die');o.dice[0].forEach(d=>dice[d].classList.add('pa'));o.dice[1].forEach(d=>dice[d].classList.add('pb'));
+}
+function comboTarget(e){const t=e.target.closest('[data-play]');if(!t)return null;return{i:+t.closest('.combo').dataset.i,k:+t.dataset.play};}
+
+function flash(text,color){const f=$('#flash');f.style.setProperty('--fc',color);f.querySelector('span').textContent=text;f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
+
+/* ---- 回合流程 ---- */
+function startGame(){
+  G.token++;G.aiMsg='';G.thinking=false;
+  G.st=Rules.newState(prefs.mode,prefs.level);
+  $('#lobby').classList.add('hidden');$('#game').classList.remove('hidden');$$('.overlay').forEach(o=>o.classList.remove('on'));
+  buildBoard();buildDice();window.scrollTo(0,0);beginTurn();
+}
+function toLobby(){G.token++;setTumble(false);$$('.overlay').forEach(o=>o.classList.remove('on'));$('#game').classList.add('hidden');$('#lobby').classList.remove('hidden');renderStats();}
+function beginTurn(){G.st.phase='start';G.st.options=[];G.aiMsg='';renderAll();if(isAI())aiTurn(G.token);}
+
+async function doRoll(tok){
+  const st=G.st;st.phase='rolling';st.options=[];clearPreview();renderAll();
+  st.dice=Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
+  await sleep(650);if(tok!==G.token)return false;
+  st.options=Rules.options(st,st.dice);
+  if(!st.options.some(o=>o.plays.length)){st.phase='choose';renderAll();await sleep(500);if(tok!==G.token)return false;await doBust(tok);return false;}
+  st.phase='choose';renderAll();return true;
+}
+function doChoose(i,k){
+  const st=G.st;clearPreview();Rules.applyPlay(st,st.options[i].plays[k]);st.phase='decide';SFX.pick();SFX.step();renderAll();
+}
+async function doBust(tok){
+  const st=G.st;st.phase='bust';G.aiMsg='';G.thinking=false;
+  stats['b'+st.current]++;store.set(STAT_KEY,stats);
+  renderPlayers();renderCtrl();renderCombos();
+  $$('#pieces .runner').forEach(el=>{el.dataset.key='';el.classList.add('busting');setTimeout(()=>el.remove(),1300);});
+  const g=$('#game');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake');
+  const v=$('#vignette');v.classList.remove('on');void v.offsetWidth;v.classList.add('on');
+  flash('BUST!','var(--danger)');SFX.bust();
+  await sleep(1500);if(tok!==G.token)return;
+  Rules.bust(st);switchTurn('bust');
+}
+async function doStop(tok){
+  const st=G.st,cur=st.current;st.phase='bank';
+  const res=Rules.stop(st);renderAll();
+  if(res.claimedNow.length){SFX.claim();flash(res.claimedNow.join(' · ')+' 封頂!',cur?'var(--p2)':'var(--p1)');
+    res.claimedNow.forEach(c=>{const el=colEl(c);el.classList.remove('justclaimed');void el.offsetWidth;el.classList.add('justclaimed');});}
+  else SFX.bank();
+  await sleep(res.claimedNow.length?1400:800);if(tok!==G.token)return;
+  if(res.winner!==null)return endGame(res.winner);
+  switchTurn('bank');
+}
+function switchTurn(reason){
+  const st=G.st,prev=st.current;st.current=1-prev;
+  if(st.mode==='local'){
+    st.phase='start';renderAll();
+    $('#passSub').textContent=reason==='bust'?`${pname(prev)} 爆掉了 💥`:`${pname(prev)} 收手，進度已保存`;
+    const t=$('#passTitle');t.textContent=`請換 P${st.current+1} 操作`;t.className=`orb text-4xl sm:text-6xl font-black mb-3 t-p${st.current+1}`;
+    $('#passOv').classList.add('on');
+  }else beginTurn();
+}
+function endGame(w){
+  const st=G.st;st.phase='over';G.aiMsg='';renderAll();
+  stats.games++;stats['w'+w]++;stats.cur=w===0?stats.cur+1:0;stats.best=Math.max(stats.best,stats.cur);store.set(STAT_KEY,stats);
+  const t=$('#winTitle');t.textContent=`${pname(w)} 獲勝！`;t.className=`orb text-4xl sm:text-5xl font-black mb-2 t-p${w+1}`;
+  $('#winSub').textContent=st.mode==='ai'?(w===0?`你擊敗了 Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh} · 目前連勝 ${stats.cur}`:`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh} 搶先攻下 3 座山頭`):'搶先封頂 3 條賽道';
+  SFX.win();$('#winOv').classList.add('on');
+}
+
+/* ---- AI 回合：擲骰 → 思考分組 → 決定繼續/收手，每步皆有 1~1.5 秒延遲 ---- */
+async function aiTurn(tok){
+  const st=G.st,alive=()=>tok===G.token&&st.phase!=='over';
+  const say=(m,think)=>{G.aiMsg=m;G.thinking=!!think;renderPlayers();renderCtrl();};
+  while(alive()){
+    say('AI 正在計算機率',true);setTumble(true);
+    await sleep(1200);if(!alive())return;
+    setTumble(false);say('AI 擲骰');
+    if(!await doRoll(tok))return;
+    say('AI 正在思考分組',true);
+    await sleep(1200);if(!alive())return;
+    const pick=AI.pickPlay(st,st.options),card=$(`.combo[data-i="${pick.i}"]`);
+    if(card){card.classList.add('ai-pick');if(st.options[pick.i].choose)card.querySelectorAll('.num')[pick.k]?.classList.add('ai-pick');}
+    showPreview(pick.i,pick.k);say(`AI 選擇 ${st.options[pick.i].plays[pick.k].join(' & ')}`);
+    await sleep(900);if(!alive())return;
+    doChoose(pick.i,pick.k);
+    say('AI 正在計算機率',true);
+    await sleep(1100);if(!alive())return;
+    const d=AI.shouldStop(st);
+    say(`爆掉機率 ${Math.round(d.p*100)}% → ${d.stop?'收手':'繼續擲骰'}${d.why?`（${d.why}）`:''}`);
+    await sleep(1000);if(!alive())return;
+    if(d.stop){G.aiMsg='';await doStop(tok);return;}
+  }
+}
+
+/* ---- 事件綁定 ---- */
+$('#btnRoll').onclick=()=>{const s=G.st;if(isAI()||!(s.phase==='start'||s.phase==='decide'))return;doRoll(G.token);};
+$('#btnStop').onclick=()=>{if(isAI()||G.st.phase!=='decide')return;doStop(G.token);};
+const combos=$('#combos');
+const canPick=()=>G.st&&G.st.phase==='choose'&&!isAI();
+combos.addEventListener('mouseover',e=>{if(!canPick())return;const t=comboTarget(e);t?showPreview(t.i,t.k):clearPreview();});
+combos.addEventListener('mouseleave',()=>{if(canPick())clearPreview();});
+combos.addEventListener('focusin',e=>{if(!canPick())return;const t=comboTarget(e);if(t)showPreview(t.i,t.k);});
+combos.addEventListener('click',e=>{if(!canPick())return;const t=comboTarget(e);if(t)doChoose(t.i,t.k);});
+combos.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&canPick()){const t=comboTarget(e);if(t){e.preventDefault();doChoose(t.i,t.k);}}});
+$('#passOk').onclick=()=>{$('#passOv').classList.remove('on');beginTurn();};
+$('#btnAgain').onclick=startGame;$('#btnLobby').onclick=toLobby;$('#btnBack').onclick=toLobby;$('#btnStart').onclick=startGame;
+
+/* ---- 大廳 ---- */
+function renderLobby(){
+  $$('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===prefs.mode));
+  $('#aiBox').classList.toggle('hidden',prefs.mode!=='ai');$('#localBox').classList.toggle('hidden',prefs.mode!=='local');
+  $('#aiLevel').value=prefs.level;$('#aiDesc').textContent=LEVELS[prefs.level].desc;
+}
+$('#aiLevel').innerHTML=LEVELS.slice(1).map((l,i)=>`<option value="${i+1}">${i+1} 階 · ${l.zh} ${l.en}</option>`).join('');
+$('#modeSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;prefs.mode=b.dataset.mode;store.set('cantstop.prefs.v1',prefs);renderLobby();};
+$('#aiLevel').onchange=e=>{prefs.level=+e.target.value;store.set('cantstop.prefs.v1',prefs);renderLobby();};
+let clearArm=null;
+$('#btnClear').onclick=e=>{
+  const b=e.currentTarget;
+  if(!clearArm){b.textContent='再按一次確認';b.style.borderColor='var(--danger)';b.style.color='var(--danger)';clearArm=setTimeout(()=>{clearArm=null;b.textContent='清除戰績';b.style.borderColor=b.style.color='';},3000);return;}
+  clearTimeout(clearArm);clearArm=null;b.textContent='清除戰績';b.style.borderColor=b.style.color='';
+  stats={...STAT_DEF};store.set(STAT_KEY,stats);renderStats();
+};
+BGM.init();renderLobby();renderStats();
+window.__cs={G,Rules,AI,startGame};
+}
+else{module.exports={Rules,AI,COLS,H};}
+</script>
+</body>
+</html>
