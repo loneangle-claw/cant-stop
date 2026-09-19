@@ -26,3 +26,10 @@ python -m http.server 8931   # 然後開 http://localhost:8931/index.html
 ```
 
 全部程式碼在 `index.html`：規則核心 `Rules`（純邏輯不碰 DOM）、AI `AI`、UI 渲染分離，兩種模式共用同一套規則。
+
+## 部署
+
+- **GitHub Pages**（目前上線中）：push 到 `main` 即自動更新，網址如上。
+- **Cloudflare Workers**（備用，設定已備好）：Cloudflare 後台 → Workers & Pages → Create → Import a repository → 選這個 repo，之後 push 一樣自動部署到 `https://cant-stop.fbiericlin.workers.dev/`。
+  `wrangler.jsonc` 走純靜態資產（沒有後端 API，所以沒有 worker script），只上傳 `index.html`，其餘由 `.assetsignore` 排除。
+  本機驗證設定：`npx wrangler deploy --dry-run`。

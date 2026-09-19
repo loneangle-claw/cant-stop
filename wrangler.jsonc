@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers：純靜態資產（沒有後端 API，所以不需要 main / worker script）。
+  // 上線方式：Cloudflare 後台 → Workers & Pages → Create → Import a repository → 選 loneangle-claw/cant-stop
+  // 接上之後每次 git push 會自動部署到 https://cant-stop.fbiericlin.workers.dev/
+  // 專案根目錄就是網站根目錄（index.html 在根，GitHub Pages 也吃同一份），
+  // 不該上線的檔案列在 .assetsignore。
+  "name": "cant-stop",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./",
+    // 任何找不到的路徑都回 index.html（單頁遊戲，沒有其他頁面）
+    "not_found_handling": "single-page-application"
+  }
+}
