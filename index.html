@@ -568,8 +568,8 @@ const Rules={
 const LEVELS=[null,
   {zh:'極度膽小',en:'Timid',desc:'有賺就收：只要任何棋子前進 1 步就立刻收手，幾乎不會爆掉。分組隨機。'},
   {zh:'穩健新手',en:'Cautious',desc:'用滿 2 顆暫時棋子，或任一棋子前進 2 步才收手。'},
-  {zh:'理性標準',en:'Rational',desc:'動態計算爆掉機率，超過 50% 就收手；分組優先推進現有的暫時棋子。'},
-  {zh:'激進專家',en:'Aggressive',desc:'賭徒心態：3 顆棋子用完且爆掉機率 ≥ 75% 才收手；偏好短賽道 2、3、11、12 爆發超車。'},
+  {zh:'理性標準',en:'Rational',desc:'3 顆棋子用完後算期望值：「爆掉機率 × 本回合已走步數」超過繼續擲的收益就收手；分組優先推進現有的暫時棋子。'},
+  {zh:'激進專家',en:'Aggressive',desc:'賭徒心態：同樣算期望值，但願意比理性標準多扛 5 成風險才收手；分組會衡量後續爆掉率，並偏好短賽道 2、3、11、12 爆發超車。'},
   {zh:'機率大師',en:'Master',desc:'期望值演算：選擇讓後續爆掉率最低的分組；落後時極度激進，領先時精準卡位。'}
 ];
 const AI={
@@ -595,19 +595,21 @@ const AI={
     if(lv===1)return this.rand(flat);
     if(lv===2)return this.best(flat,x=>x.play.length);
     if(lv===3)return this.best(flat,x=>x.play.reduce((s,c)=>s+((c in R)?2:0)+1,0));
-    if(lv===4)return this.best(flat,x=>x.play.reduce((s,c)=>s+((c<=3||c>=11)?3:1)+((c in R)?.5:0),0));
+    if(lv===4)return this.best(flat,x=>{const{v,r1}=this.playValue(st,R,x.play);return v+.15*x.play.filter(c=>c<=3||c>=11).length-2*Rules.bustProb(st,r1);});
     const lead=this.lead(st),wP=lead>.5?4:lead<-.5?2:3;
     return this.best(flat,x=>{const{v,r1}=this.playValue(st,R,x.play);return v-wP*Rules.bustProb(st,r1);});
   },
   shouldStop(st){
     const lv=st.aiLevel,R=st.runners,perm=st.perm[st.current],p=Rules.bustProb(st);
     const used=Object.keys(R).length,adv=Object.keys(R).map(c=>R[c]-(perm[c]||0));
-    const steps=adv.reduce((a,b)=>a+b,0),topped=Object.keys(R).filter(c=>R[c]>=H[c]).length;
+    const steps=adv.reduce((a,b)=>a+b,0);
     if(Rules.wouldWin(st))return{stop:true,p,why:'已足夠獲勝'};
     if(lv===1)return{stop:steps>=1,p};
     if(lv===2)return{stop:used>=2||adv.some(a=>a>=2),p};
-    if(lv===3)return{stop:p>.5||(used===3&&p*steps>(1-p)*2),p};
-    if(lv===4)return{stop:used===3&&(p>=.75||(topped>0&&p>=.5)),p};
+    // 3 顆棋子的爆掉機率實際只落在 8%–56%（165 種組合中 ≥50% 的只有 2 種、≥75% 的是 0 種），
+    // 所以不能用固定門檻，改比較「爆掉損失 p×已走步數」與「續擲收益 (1-p)×K」；K 越大越敢賭（模擬校準：Lv3=2、Lv4=3）
+    if(lv===3)return{stop:used===3&&p*steps>(1-p)*2,p};
+    if(lv===4)return{stop:used===3&&p*steps>(1-p)*3,p};
     // Lv5：比較「爆掉損失」與「再擲一次的期望收益」，依局勢調整膽量
     if(used<3&&p<.12)return{stop:false,p};
     let risk=0;for(const c in R)risk+=(R[c]-(perm[c]||0))/H[c]+(R[c]>=H[c]?.6:0);
