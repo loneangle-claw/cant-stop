@@ -1,14 +1,19 @@
 {
-  // Cloudflare Workers：純靜態資產（沒有後端 API，所以不需要 main / worker script）。
+  // Cloudflare Workers：靜態資產（docs/，GitHub Pages 也從這個資料夾發佈）＋ 線上對戰後端（worker/index.js，房間用 Durable Object）。
   // 上線方式：Cloudflare 後台 → Workers & Pages → Create → Import a repository → 選 loneangle-claw/cant-stop
   // 接上之後每次 git push 會自動部署到 https://cant-stop.fbiericlin.workers.dev/
-  // 專案根目錄就是網站根目錄（index.html 在根，GitHub Pages 也吃同一份），
-  // 不該上線的檔案列在 .assetsignore。
+  // GitHub Pages 那份頁面的「線上對戰」也是連到這個 Worker（見 index.html 的 NET_ORIGIN）。
   "name": "cant-stop",
+  "main": "worker/index.js",
   "compatibility_date": "2026-09-01",
   "assets": {
-    "directory": "./",
-    // 任何找不到的路徑都回 index.html（單頁遊戲，沒有其他頁面）
-    "not_found_handling": "single-page-application"
-  }
+    "directory": "./docs",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // /api/* 一律先進 Worker（否則會被 single-page-application 回成 index.html）
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": { "bindings": [{ "name": "ROOM", "class_name": "Room" }] },
+  // 免費方案的 Durable Object 必須是 SQLite 後端
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }]
 }

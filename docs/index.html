@@ -355,6 +355,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .tut-on .tut-b,.tut-on #tutRing,.tut-on #tutTip{display:block}
 #btnTut.nudge{animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{transform:translateY(-3px);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent),var(--hard)}}
+#netBanner{position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top));transform:translateX(-50%);z-index:70;max-width:92vw;padding:6px 14px;border-radius:999px;font-size:.78rem;font-weight:700;background:var(--danger);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* ---------- 遮罩 ---------- */
 .overlay{position:fixed;inset:0;z-index:80;display:none;place-items:center;background:var(--ov-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:20px}
 .overlay.on{display:grid;animation:ovin .3s}
@@ -394,14 +395,21 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
     <div class="grid md:grid-cols-2 gap-4">
       <section class="panel p-5 space-y-4">
         <h2 class="orb text-sm tracking-widest t-run">GAME MODE</h2>
-        <div class="seg" id="modeSeg">
-          <button data-mode="ai" data-ic="cpu">單人對抗 AI</button>
-          <button data-mode="local" data-ic="users">雙人本地對戰</button>
+        <div class="seg three" id="modeSeg">
+          <button data-mode="ai" data-ic="cpu">對抗 AI</button>
+          <button data-mode="local" data-ic="users">同機雙人</button>
+          <button data-mode="online" data-ic="globe">線上對戰</button>
         </div>
         <div id="aiBox">
           <label class="text-xs dim block mb-1">AI 對手難度</label>
           <select id="aiLevel" class="w-full"></select>
           <p id="aiDesc" class="text-xs dim mt-2 min-h-[2.5em]"></p>
+        </div>
+        <div id="onlineBox" class="hidden space-y-2">
+          <p class="text-xs dim leading-relaxed">兩支手機各玩各的：一人建立房間，把 4 位數房號（或邀請連結）給對方加入。骰子由伺服器擲，雙方都動不了手腳。</p>
+          <button id="btnCreate" class="btn btn-start w-full">建立房間</button>
+          <div class="flex gap-2"><input id="joinCode" class="sel flex-1 min-w-0 text-center orb" inputmode="numeric" maxlength="4" placeholder="輸入房號" aria-label="房號" style="font-size:16px"><button id="btnJoin" class="btn btn-roll btn-md">加入</button></div>
+          <p id="netMsg" class="text-xs dim min-h-[1.2em]"></p>
         </div>
         <div id="localBox" class="hidden text-xs dim leading-relaxed">
           Pass &amp; Play：同一台裝置輪流操作，回合交替時會跳出全螢幕提示再交給下一位。
@@ -494,6 +502,16 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
   <p id="winSub" class="dim mb-8"></p>
   <div class="grid grid-cols-2 gap-3"><button id="btnAgain" class="btn btn-start">再來一局</button><button id="btnLobby" class="btn btn-ghost">回大廳</button></div>
 </div></div>
+
+<div id="roomOv" class="overlay"><div class="text-center pop">
+  <p class="dim mb-2">房號</p>
+  <h2 id="roomCode" class="orb text-6xl sm:text-7xl font-black mb-4 t-run" style="letter-spacing:.12em"></h2>
+  <p class="mb-1">等待對手加入<span class="dots"></span></p>
+  <button id="roomLink" class="text-xs dim underline break-all max-w-xs"></button>
+  <p id="roomCopied" class="text-[11px] faint mb-8">點一下複製邀請連結</p>
+  <button id="roomCancel" class="btn btn-ghost px-8">取消</button>
+</div></div>
+<div id="netBanner" class="hidden"></div>
 
 <!-- ===== 新手教學 ===== -->
 <div class="tut-b" id="tutT"></div><div class="tut-b" id="tutB"></div><div class="tut-b" id="tutL"></div><div class="tut-b" id="tutR"></div>
@@ -816,7 +834,7 @@ const STAT_KEY='cantstop.stats.v1',STAT_DEF={games:0,w0:0,w1:0,best:0,cur:0,b0:0
 const SUM_THEORY=[1,2,3,4,5,6,5,4,3,2,1].map(x=>x/36);
 const diceStat=p=>{if(!Array.isArray(stats.dice))stats.dice=[0,1].map(()=>({rolls:0,sums:Array(11).fill(0),busts:0,exp:0}));return stats.dice[p];};
 function recordRoll(st,pBust,bust){
-  const d=diceStat(st.current);d.rolls++;d.exp+=pBust;if(bust)d.busts++;
+  const d=diceStat(sp(st.current));d.rolls++;d.exp+=pBust;if(bust)d.busts++;
   for(const sp of SPLITS)for(const pr of sp)d.sums[st.dice[pr[0]]+st.dice[pr[1]]-2]++;
   store.set(STAT_KEY,stats);
 }
@@ -846,7 +864,10 @@ const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
 const FACE_ROT={1:[0,0],2:[0,-90],3:[-90,0],4:[90,0],5:[0,90],6:[0,180]};
 const LABEL={ok:'可走',claimed:'已封頂',top:'已達頂',norunner:'無棋子'};
 const isAI=()=>G.st.mode==='ai'&&G.st.current===1;
-const pname=p=>p===0?'玩家 1':G.st.mode==='ai'?'AI':'玩家 2';
+const isOnline=()=>!!G.st&&G.st.mode==='online';
+const myTurn=()=>!isAI()&&(!isOnline()||G.st.current===Net.seat);        // 這一手是不是「這台裝置」可以操作
+const sp=p=>isOnline()?(p===Net.seat?0:1):p;                              // 戰績欄位：線上時「玩家 1」＝自己
+const pname=p=>isOnline()?(p===Net.seat?'你':'對手'):p===0?'玩家 1':G.st.mode==='ai'?'AI':'玩家 2';
 
 function buildDice(){
   $('#dice').innerHTML=[0,1,2,3].map(()=>`<div class="die"><div class="tilt"><div class="cube">${[1,2,3,4,5,6].map(f=>
@@ -914,7 +935,7 @@ function renderPlayers(){
   const st=G.st;
   $('#players').innerHTML=[0,1].map(p=>{
     const ai=st.mode==='ai'&&p===1,act=st.current===p&&st.phase!=='over',n=Rules.claimedCount(st,p);
-    const sub=ai?`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh}`:(st.mode==='ai'?'YOU':'HUMAN');
+    const sub=ai?`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh}`:isOnline()?(Net.present[p]?'ONLINE':'OFFLINE'):(st.mode==='ai'?'YOU':'HUMAN');
     const msg=act?(ai?(G.aiMsg||'AI 回合'):'行動中'):'等待中';
     return`<div class="pcard p${p} ${act?'active':''}" style="--c:var(--p${p+1})"><div class="flex items-center gap-2">
       <div class="avatar ${ai&&act?'breath':''}">${pieceSVG('m'+p)}</div>
@@ -924,7 +945,7 @@ function renderPlayers(){
   }).join('');
 }
 function renderCtrl(){
-  const st=G.st,human=!isAI()&&st.phase!=='over',free=Rules.free(st);
+  const st=G.st,human=myTurn()&&st.phase!=='over',free=Rules.free(st);
   $('#btnRoll').disabled=!(human&&(st.phase==='start'||st.phase==='decide'));
   $('#btnStop').disabled=!(human&&st.phase==='decide');
   $('#btnRoll').innerHTML=IC.dice+(st.phase==='decide'?'繼續擲骰':'擲骰');
@@ -934,9 +955,9 @@ function renderCtrl(){
   bar.style.width=Math.max(pct,2)+'%';
   const col=p<.25?'var(--ok)':p<.5?'var(--warn)':'var(--danger)';bar.style.background=col;bar.style.boxShadow=`0 0 var(--gr) ${col}`;
   $('#gaugeTxt').textContent=pct+'%';$('#gaugeTxt').style.color=col;
-  const who=`<span class="t-p${st.current+1}">${pname(st.current)}</span>`;
-  const txt={start:`${who}：請擲骰`,rolling:'擲骰中…',choose:isAI()?`${who} 正在思考分組`:`${who}：選擇一組分組`,
-    decide:isAI()?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="t-danger font-bold">爆掉了！本回合進度歸零</span>',
+  const who=`<span class="t-p${st.current+1}">${pname(st.current)}</span>`,wait=isOnline()&&!myTurn();
+  const txt={start:wait?`等待 ${who} 擲骰…`:`${who}：請擲骰`,rolling:'擲骰中…',choose:isAI()||wait?`${who} 正在思考分組`:`${who}：選擇一組分組`,
+    decide:isAI()||wait?`${who} 正在評估風險`:`${who}：繼續擲骰，還是收手？`,bust:'<span class="t-danger font-bold">爆掉了！本回合進度歸零</span>',
     bank:`${who} 收手，進度已保存`,over:'遊戲結束'}[st.phase]||'';
   $('#status').innerHTML=isAI()&&G.aiMsg&&st.phase!=='bust'?`<span class="t-p2 ${G.thinking?'dots':''}">${G.aiMsg}</span>`:txt;
 }
@@ -949,7 +970,7 @@ function comboHTML(o,i){
 }
 function renderCombos(){
   const st=G.st,box=$('#combos');
-  box.classList.toggle('live',st.phase==='choose'&&!isAI());
+  box.classList.toggle('live',st.phase==='choose'&&myTurn());
   box.innerHTML=st.phase==='choose'?st.options.map(comboHTML).join(''):'<div class="combo-empty">擲骰後，在此選擇兩兩分組</div>';
 }
 function renderAll(){renderPlayers();renderCols();renderPieces();renderCtrl();renderCombos();}
@@ -969,17 +990,17 @@ function flash(text,color){const f=$('#flash');f.style.setProperty('--fc',color)
 /* ---- 回合流程 ---- */
 function startGame(tut){
   G.token++;G.aiMsg='';G.thinking=false;G.forceDice=null;
-  G.st=Rules.newState(tut===true?'local':prefs.mode,prefs.level);
+  G.st=Rules.newState(tut===true?'local':tut==='online'?'online':prefs.mode,prefs.level);
   $('#lobby').classList.add('hidden');$('#game').classList.remove('hidden');$$('.overlay').forEach(o=>o.classList.remove('on'));
   buildBoard();buildDice();window.scrollTo(0,0);beginTurn();
 }
-function toLobby(){Tut.stop();G.token++;setTumble(false);$$('.overlay').forEach(o=>o.classList.remove('on'));$('#game').classList.add('hidden');$('#lobby').classList.remove('hidden');renderStats();}
+function toLobby(){Tut.stop();Net.close();G.token++;setTumble(false);$$('.overlay').forEach(o=>o.classList.remove('on'));$('#game').classList.add('hidden');$('#lobby').classList.remove('hidden');renderStats();}
 function beginTurn(){G.st.phase='start';G.st.options=[];G.aiMsg='';renderAll();if(isAI())aiTurn(G.token);}
 
-async function doRoll(tok){
+async function doRoll(tok,given){                       // given：線上對戰由伺服器擲出的骰點
   const st=G.st;st.phase='rolling';st.options=[];clearPreview();renderAll();
   const pBust=Rules.bustProb(st),forced=G.forceDice&&G.forceDice.shift();
-  st.dice=forced||Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
+  st.dice=given||forced||Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
   if(!forced)recordRoll(st,pBust,!Rules.options(st,st.dice).some(o=>o.plays.length));
   await sleep(650);if(tok!==G.token)return false;
   st.options=Rules.options(st,st.dice);
@@ -991,7 +1012,7 @@ function doChoose(i,k){
 }
 async function doBust(tok){
   const st=G.st;st.phase='bust';G.aiMsg='';G.thinking=false;
-  stats['b'+st.current]++;store.set(STAT_KEY,stats);
+  stats['b'+sp(st.current)]++;store.set(STAT_KEY,stats);
   renderPlayers();renderCtrl();renderCombos();
   $$('#pieces .runner').forEach(el=>{el.dataset.key='';el.classList.add('busting');setTimeout(()=>el.remove(),1300);});
   const g=$('#game');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake');
@@ -1020,11 +1041,11 @@ function switchTurn(reason){
     $('#passOv').classList.add('on');
   }else beginTurn();
 }
-function endGame(w){
+function endGame(w,replayed){                          // replayed：重連補進度時看到的結局，不重複記戰績
   const st=G.st;st.phase='over';G.aiMsg='';renderAll();
-  stats.games++;stats['w'+w]++;stats.cur=w===0?stats.cur+1:0;stats.best=Math.max(stats.best,stats.cur);store.set(STAT_KEY,stats);
+  if(!replayed){const k=sp(w);stats.games++;stats['w'+k]++;stats.cur=k===0?stats.cur+1:0;stats.best=Math.max(stats.best,stats.cur);store.set(STAT_KEY,stats);}
   const t=$('#winTitle');t.textContent=`${pname(w)} 獲勝！`;t.className=`orb text-4xl sm:text-5xl font-black mb-2 t-p${w+1}`;
-  $('#winSub').textContent=st.mode==='ai'?(w===0?`你擊敗了 Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh} · 目前連勝 ${stats.cur}`:`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh} 搶先攻下 3 座山頭`):'搶先封頂 3 條賽道';
+  $('#winSub').textContent=st.mode==='ai'?(w===0?`你擊敗了 Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh} · 目前連勝 ${stats.cur}`:`Lv${st.aiLevel} ${LEVELS[st.aiLevel].zh} 搶先攻下 3 座山頭`):isOnline()?(w===Net.seat?'你搶先封頂 3 條賽道':'對手搶先封頂 3 條賽道'):'搶先封頂 3 條賽道';
   SFX.win();$('#winOv').classList.add('on');
 }
 
@@ -1054,17 +1075,18 @@ async function aiTurn(tok){
 }
 
 /* ---- 事件綁定 ---- */
-$('#btnRoll').onclick=()=>{const s=G.st;if(isAI()||!(s.phase==='start'||s.phase==='decide'))return;doRoll(G.token);};
-$('#btnStop').onclick=()=>{if(isAI()||G.st.phase!=='decide')return;doStop(G.token);};
+$('#btnRoll').onclick=()=>{const s=G.st;if(!myTurn()||!(s.phase==='start'||s.phase==='decide'))return;isOnline()?Net.send({t:'roll'}):doRoll(G.token);};
+$('#btnStop').onclick=()=>{if(!myTurn()||G.st.phase!=='decide')return;isOnline()?Net.send({t:'stop'}):doStop(G.token);};
 const combos=$('#combos');
-const canPick=()=>G.st&&G.st.phase==='choose'&&!isAI();
+const canPick=()=>G.st&&G.st.phase==='choose'&&myTurn();
+const pick=t=>isOnline()?Net.send({t:'pick',i:t.i,k:t.k}):doChoose(t.i,t.k);
 combos.addEventListener('mouseover',e=>{if(!canPick())return;const t=comboTarget(e);t?showPreview(t.i,t.k):clearPreview();});
 combos.addEventListener('mouseleave',()=>{if(canPick())clearPreview();});
 combos.addEventListener('focusin',e=>{if(!canPick())return;const t=comboTarget(e);if(t)showPreview(t.i,t.k);});
-combos.addEventListener('click',e=>{if(!canPick())return;const t=comboTarget(e);if(t)doChoose(t.i,t.k);});
-combos.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&canPick()){const t=comboTarget(e);if(t){e.preventDefault();doChoose(t.i,t.k);}}});
+combos.addEventListener('click',e=>{if(!canPick())return;const t=comboTarget(e);if(t)pick(t);});
+combos.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&canPick()){const t=comboTarget(e);if(t){e.preventDefault();pick(t);}}});
 $('#passOk').onclick=()=>{$('#passOv').classList.remove('on');beginTurn();};
-$('#btnAgain').onclick=()=>startGame();$('#btnLobby').onclick=toLobby;$('#btnBack').onclick=toLobby;$('#btnStart').onclick=()=>startGame();
+$('#btnAgain').onclick=()=>isOnline()?Net.send({t:'again'}):startGame();$('#btnLobby').onclick=toLobby;$('#btnBack').onclick=toLobby;$('#btnStart').onclick=()=>startGame();
 
 /* ---- 圖示（線條 SVG，吃 currentColor；不用 emoji） ---- */
 const ic=(d,o='')=>`<svg class="ic" viewBox="0 0 24 24" ${o}>${d}</svg>`;
@@ -1073,6 +1095,7 @@ const IC={
   flag:ic('<path d="M5.5 21.5V3.5"/><path class="i2" d="M5.5 4.5h12.5l-3 4 3 4H5.5z"/>'),
   palette:ic('<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2.2-1 2.2-2.1 0-1.7 1-2.5 2.5-2.5H18a3 3 0 0 0 3-3C21 7.2 17 3 12 3z"/><circle class="i1" cx="7.6" cy="11.4" r="1.2"/><circle class="i1" cx="10.4" cy="7.4" r="1.2"/><circle class="i1" cx="15" cy="7.8" r="1.2"/>'),
   cpu:ic('<rect x="6" y="6" width="12" height="12" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9.5 3v3M14.5 3v3M9.5 18v3M14.5 18v3M3 9.5h3M3 14.5h3M18 9.5h3M18 14.5h3"/>'),
+  globe:ic('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.600 2.500 4 5.500 4 9s-1.400 6.500-4 9c-2.600-2.500-4-5.500-4-9s1.400-6.500 4-9z"/>'),
   users:ic('<circle cx="9" cy="8.5" r="3.2"/><path d="M3 20c0-3.6 2.6-6 6-6s6 2.4 6 6"/><circle cx="17" cy="9.5" r="2.5"/><path d="M16.5 14.2c2.7.2 4.5 2.3 4.5 5.3"/>'),
   help:ic('<circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.3 1.1-1.3 2.1"/><circle class="i1" cx="12" cy="17" r="1.1"/>'),
   back:ic('<path d="M14.5 5.5L8 12l6.5 6.5"/>'),
@@ -1199,10 +1222,88 @@ const Tut={
 };
 $('#btnTut').onclick=()=>Tut.start();$('#tutNext').onclick=()=>Tut.next();$('#tutSkip').onclick=toLobby;
 
+/* =====================================================================
+ * 6. 線上對戰（房號）：Cloudflare Worker + Durable Object，見 worker/index.js
+ *    - 骰子由伺服器擲；客戶端只送「我要擲骰／我選這組／我收手」，收到伺服器廣播的事件才動
+ *    - 兩邊依伺服器給的同一份有序事件、用同一套 Rules 套用，所以畫面一定一致；
+ *      斷線重連時伺服器補發整份紀錄，fastApply 快速重播回到現況
+ * ===================================================================== */
+const NET_ORIGIN=/(^|\.)workers\.dev$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)&&location.port!=='8931'?location.origin:'https://cant-stop.fbiericlin.workers.dev';
+const Net={
+  ws:null,code:'',seat:-1,token:'',queue:[],busy:false,closing:false,retry:0,ping:null,present:[false,false],inGame:false,
+  url(action){return NET_ORIGIN.replace(/^http/,'ws')+`/api/room?code=${this.code}&action=${action}&token=${encodeURIComponent(this.token)}`;},
+  msg(t,err){const e=$('#netMsg');e.textContent=t;e.classList.toggle('t-danger',!!err);},
+  create(tries=0){this.code=String(1000+Math.floor(Math.random()*9000));this.token='';this.open('create',tries);},
+  join(code){if(!/^\d{4}$/.test(code)){this.msg('房號是 4 位數字',true);return;}
+    this.code=code;let saved=null;try{saved=JSON.parse(sessionStorage.getItem('cantstop.room')||'null');}catch(e){}
+    this.token=saved&&saved.code===code?saved.token:'';this.open('join',0);},
+  open(action,tries){
+    this.close(true);this.closing=false;this.msg('連線中…');
+    let ws;try{ws=new WebSocket(this.url(action));}catch(e){this.msg('無法連線到對戰伺服器',true);return;}
+    this.ws=ws;let got=false;
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch(x){return;}got=true;
+      if(m.t==='refuse'){this.closing=true;
+        if(m.why==='taken'&&tries<6)return this.create(tries+1);
+        this.msg({noroom:'找不到這個房間（房號打錯，或房主還沒建立）',full:'這個房間已經有兩位玩家了',taken:'暫時排不到房號，請再試一次'}[m.why]||'連線被拒絕',true);this.showWait(false);return;}
+      this.on(m);};
+    ws.onclose=()=>{clearInterval(this.ping);if(this.ws!==ws||this.closing)return;
+      if(!got&&!this.inGame){this.msg('連不上對戰伺服器（'+NET_ORIGIN.replace(/^https?:\/\//,'')+'）',true);this.showWait(false);return;}
+      if(this.retry++<8){this.banner('連線中斷，重新連線中…');setTimeout(()=>{if(!this.closing)this.open('join',0);},1200*Math.min(this.retry,4));}
+      else this.banner('無法重新連線，請回大廳重新加入房間');};
+    ws.onopen=()=>{this.ping=setInterval(()=>this.send({t:'ping'}),25000);};
+  },
+  close(silent){this.closing=true;clearInterval(this.ping);if(this.ws){try{this.ws.close();}catch(e){}}this.ws=null;if(!silent){this.inGame=false;this.queue=[];this.retry=0;this.showWait(false);this.banner('');}},
+  send(m){if(this.ws&&this.ws.readyState===1)this.ws.send(JSON.stringify(m));},
+  banner(t){const e=$('#netBanner');e.textContent=t;e.classList.toggle('hidden',!t);},
+  showWait(on){$('#roomOv').classList.toggle('on',!!on);if(on){$('#roomCode').textContent=this.code;
+    const link=location.origin+location.pathname+'?room='+this.code;$('#roomLink').textContent=link;$('#roomLink').dataset.link=link;}},
+  on(m){
+    if(m.t==='sync'){this.seat=m.seat;this.token=m.token;this.retry=0;this.present=m.present;this.banner('');
+      try{sessionStorage.setItem('cantstop.room',JSON.stringify({code:this.code,token:m.token}));}catch(e){}
+      if(m.started){this.fresh=!m.log.length;this.begin();for(const ev of m.log)this.fastApply(ev);this.afterReplay();}     // 重連：快速重播到現況
+      else{this.msg('');this.showWait(true);}
+    }else if(m.t==='presence'){this.present=m.present;
+      if(this.inGame)this.banner(m.present[1-this.seat]?'':'對手離線了，等他重新連線…（房號 '+this.code+'）');
+    }else if(m.t==='start'){if(this.fresh){this.fresh=false;return;}this.begin();
+    }else if(m.t==='dice'||m.t==='pick'||m.t==='stop'){this.fresh=false;this.queue.push(m);this.pump();}
+  },
+  begin(){this.showWait(false);this.queue=[];this.inGame=true;startGame('online');},
+  /** 事件逐一處理，等上一個動畫跑完才處理下一個 */
+  async pump(){if(this.busy)return;this.busy=true;
+    while(this.queue.length){const ev=this.queue.shift(),tok=G.token;try{await this.apply(ev,tok);}catch(e){console.error(e);}}
+    this.busy=false;},
+  valid(st,ev){return ev.p===st.current&&(ev.t==='dice'?(st.phase==='start'||st.phase==='decide'):ev.t==='pick'?(st.phase==='choose'&&st.options[ev.i]&&st.options[ev.i].plays[ev.k]):st.phase==='decide');},
+  async apply(ev,tok){
+    const st=G.st;if(!st||st.mode!=='online'||!this.valid(st,ev))return;
+    if(ev.t==='dice')await doRoll(tok,ev.dice);
+    else if(ev.t==='pick'){
+      if(ev.p!==this.seat){const card=$(`.combo[data-i="${ev.i}"]`);if(card){card.classList.add('ai-pick');if(st.options[ev.i].choose)card.querySelectorAll('.num')[ev.k]?.classList.add('ai-pick');}
+        showPreview(ev.i,ev.k);await sleep(750);if(tok!==G.token)return;}
+      doChoose(ev.i,ev.k);await sleep(350);
+    }else await doStop(tok);
+  },
+  /** 無動畫版，只在重連補進度時用；規則判斷與 apply 完全相同 */
+  fastApply(ev){
+    const st=G.st;if(!this.valid(st,ev))return;
+    if(ev.t==='dice'){st.dice=ev.dice;st.options=Rules.options(st,ev.dice);
+      if(st.options.some(o=>o.plays.length))st.phase='choose';else{Rules.bust(st);st.current=1-st.current;st.phase='start';st.options=[];}}
+    else if(ev.t==='pick'){Rules.applyPlay(st,st.options[ev.i].plays[ev.k]);st.phase='decide';}
+    else{const r=Rules.stop(st);if(r.winner!==null)st.phase='over';else{st.current=1-st.current;st.phase='start';st.options=[];}}
+  },
+  afterReplay(){const st=G.st;st.dice.forEach((v,i)=>setDie(i,v,false));renderAll();if(st.phase==='over')endGame(st.winner,true);}
+};
+$('#btnCreate').onclick=()=>{SFX.pick();Net.create();};
+$('#btnJoin').onclick=()=>{SFX.pick();Net.join($('#joinCode').value.trim());};
+$('#joinCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('#btnJoin').click();});
+$('#roomCancel').onclick=()=>Net.close();
+$('#roomLink').onclick=e=>{const l=e.currentTarget.dataset.link;if(navigator.clipboard)navigator.clipboard.writeText(l).then(()=>{$('#roomCopied').textContent='已複製連結';setTimeout(()=>$('#roomCopied').textContent='點一下複製邀請連結',1500);});};
+{const r=new URLSearchParams(location.search).get('room');if(r&&/^\d{4}$/.test(r)){prefs.mode='online';$('#joinCode').value=r;setTimeout(()=>Net.join(r),0);}}   // 邀請連結／重新整理：直接進房
+
 /* ---- 大廳 ---- */
 function renderLobby(){
   $$('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===prefs.mode));
   $('#aiBox').classList.toggle('hidden',prefs.mode!=='ai');$('#localBox').classList.toggle('hidden',prefs.mode!=='local');
+  $('#onlineBox').classList.toggle('hidden',prefs.mode!=='online');$('#btnStart').classList.toggle('hidden',prefs.mode==='online');
   $('#aiLevel').value=prefs.level;$('#aiDesc').textContent=LEVELS[prefs.level].desc;
 }
 $('#aiLevel').innerHTML=LEVELS.slice(1).map((l,i)=>`<option value="${i+1}">${i+1} 階 · ${l.zh} ${l.en}</option>`).join('');
@@ -1217,7 +1318,7 @@ $('#btnClear').onclick=e=>{
 };
 $('#btnDice').onclick=()=>$('#diceCheck').scrollIntoView({behavior:'smooth',block:'start'});
 BGM.init();renderLobby();renderStats();applyTheme(prefs.theme);if(!prefs.tutDone)$('#btnTut').classList.add('nudge');
-window.__cs={G,Rules,AI,startGame,applyTheme,Tut,PIECES,prefs};
+window.__cs={G,Rules,AI,startGame,applyTheme,Tut,PIECES,prefs,Net};
 }
 else{module.exports={Rules,AI,COLS,H};}
 </script>

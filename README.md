@@ -13,7 +13,8 @@
 ## 功能
 
 - **單人對抗 AI**：五階難度（極度膽小／穩健新手／理性標準／激進專家／機率大師），AI 每步有延遲動畫可觀看決策過程
-- **雙人本地對戰**：Pass & Play，回合交替時全螢幕提示
+- **同機雙人**：Pass & Play，同一台裝置輪流操作，回合交替時全螢幕提示
+- **線上對戰（房號）**：一人建立房間拿到 4 位數房號／邀請連結（`?room=1234` 開啟即自動進房），另一人加入；斷線或重新整理會自動回到原局。骰子由伺服器擲（`crypto` 亂數），雙方都改不了
 - **即時爆掉機率**：窮舉 1296 種擲骰結果計算，顯示在控制列
 - **分組互動**：組合卡片 hover 預覽賽道落點，點擊執行；僅剩 1 顆棋子時可擇一
 - **三種畫面風格**：原版桌遊（紅色停車牌八角棋盤＋實體遊戲的錐形棋子，預設）／霓虹科技／磚塊冒險（致敬瑪利歐地底關：藍磚、問號磚、金幣）；大廳選或遊戲中按調色盤鈕切換，存 LocalStorage。皮膚全在 `index.html` 開頭三個 `[data-theme]` token 區塊
@@ -28,14 +29,23 @@
 ## 開發
 
 ```bash
-python -m http.server 8931   # 然後開 http://localhost:8931/index.html
+python -m http.server 8931 -d docs   # 然後開 http://localhost:8931/（線上對戰要用下面的 wrangler dev）
 ```
 
-全部程式碼在 `index.html`：規則核心 `Rules`（純邏輯不碰 DOM）、AI `AI`、UI 渲染分離，兩種模式共用同一套規則。
+前端全部程式碼在 `docs/index.html`：規則核心 `Rules`（純邏輯不碰 DOM）、AI `AI`、UI 渲染分離，兩種模式共用同一套規則。
 
 ## 部署
 
-- **GitHub Pages**（目前上線中）：push 到 `main` 即自動更新，網址如上。
-- **Cloudflare Workers**（備用，設定已備好）：Cloudflare 後台 → Workers & Pages → Create → Import a repository → 選這個 repo，之後 push 一樣自動部署到 `https://cant-stop.fbiericlin.workers.dev/`。
-  `wrangler.jsonc` 走純靜態資產（沒有後端 API，所以沒有 worker script），只上傳 `index.html`，其餘由 `.assetsignore` 排除。
-  本機驗證設定：`npx wrangler deploy --dry-run`。
+網站檔案都在 `docs/`（`index.html`＋`music/`），後端在 `worker/`。
+
+- **GitHub Pages**：從 `main` 分支的 `/docs` 發佈，push 即自動更新，網址如上。AI／同機雙人在這裡就能玩。
+- **Cloudflare Worker**（線上對戰需要）：Cloudflare 後台 → Workers & Pages → Create → Import a repository → 選這個 repo，之後 push 自動部署到 `https://cant-stop.fbiericlin.workers.dev/`。
+  - `wrangler.jsonc`：`assets.directory=./docs`、`main=worker/index.js`、Durable Object `Room`（免費方案需 `new_sqlite_classes`）、`run_worker_first: ["/api/*"]`
+  - GitHub Pages 那份頁面的線上對戰也是連這個 Worker（`index.html` 的 `NET_ORIGIN`）；Worker 沒部署時會顯示「連不上對戰伺服器」，其他模式不受影響
+  - 本機測試：`npx wrangler dev --local --port 8787`（不用登入），開 `http://127.0.0.1:8787/`
+
+### 線上對戰協定（`worker/index.js` ↔ `index.html` 的 `Net`）
+
+`wss://…/api/room?code=1234&action=create|join&token=…`。每個房號一個 Durable Object，只保存**有序事件紀錄**：
+客戶端送 `roll`／`pick{i,k}`／`stop`／`again`，伺服器廣播 `dice{p,dice}`／`pick`／`stop`／`start`。兩邊用同一套 `Rules` 依序套用所以畫面一致；
+伺服器不懂規則，輪到誰、階段對不對由客戶端的 `Net.valid()` 把關（不合法的事件雙方都會忽略）。重連時 `sync` 帶整份紀錄，`Net.fastApply()` 無動畫重播。
