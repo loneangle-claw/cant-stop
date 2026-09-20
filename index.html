@@ -31,7 +31,7 @@
   --danger:#c62828;--ok:#23934f;--warn:#d98a00;
   --title-c:#b3261e;--title-sh:0 2px 0 #fff6dc,0 5px 0 rgba(84,56,20,.22);--title-anim:none;
   --board-bg:radial-gradient(circle at 50% 35%,#d8382f,#a81d1d 75%);--board-bd:#7d1414;
-  --cell-bg:#fff8e4;--cell-bd:#e2cf9b;--cell-r:5px;--cell-sh:inset 0 1px 0 #fff,inset 0 -1px 0 rgba(120,84,40,.18),0 2px 0 #7a1212,0 3px 3px rgba(40,0,0,.35);--tilt:7deg;
+  --cell-bg:#fff8e4;--cell-bd:#e2cf9b;--cell-r:5px;--cell-sh:inset 0 1px 0 #fff,inset 0 -1px 0 rgba(120,84,40,.18),0 2px 0 #7a1212,0 3px 3px rgba(40,0,0,.35);
   --top-bg:#ffd84d;--top-bd:#c79a00;--lab:#ffd9cf;--lab-on:#ffe27a;--hl:#fff;--hl-fill:rgba(255,255,255,.14);
   --tgt:#ffb300;--claim-mix:62%;
   --die-bg:linear-gradient(145deg,#fffdf6,#efe6d0);--die-bd:#c9b88f;--die-pip:#2b2119;--die-r:11px;--die-sh:inset 0 -3px 6px rgba(120,84,40,.18);--pa:#c0392b;--pa-pip:#c0392b;--pb:#2a66b3;--pb-pip:#2a66b3;
@@ -183,7 +183,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
 /* ---------- 棋盤：格子尺寸由容器大小推算（cqw/cqh），任何螢幕都塞得下 ---------- */
 #boardWrap{container-type:size;position:relative;min-height:0;display:flex;justify-content:center;align-items:center;padding:6px;background:var(--board-bg);border-color:var(--board-bd);
-  transform:perspective(1100px) rotateX(var(--tilt,6deg));transform-origin:50% 55%}
+  transform:perspective(800px) rotateX(var(--tilt,14deg)) scale(.965);transform-origin:50% 50%}   /* 後仰角度調 --tilt；scale 補償近端變寬 */
 [data-theme=classic] #boardWrap{border-color:transparent;box-shadow:none;background:none}
 [data-theme=classic] #boardWrap::before,[data-theme=classic] #boardWrap::after{content:'';position:absolute;inset:0;z-index:-1;clip-path:polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%)}
 [data-theme=classic] #boardWrap::before{background:linear-gradient(#8f1717,#5f0d0d)}   /* 外圈＝棋盤側邊的厚度 */
@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
   <div class="eq" id="eq"><i></i><i></i><i></i></div>
   <select id="bgmTrack" class="text-xs sel-sm" aria-label="選擇音樂"></select>
   <input id="bgmVol" type="range" min="0" max="100" value="60" class="w-14 sm:w-20" aria-label="音量">
-  <span id="bgmSrc" class="hidden sm:inline text-[10px] faint w-8"></span>
+  <span id="bgmSrc" class="text-[9px] faint"></span>
 </div>
 <audio id="bgmAudio" preload="none" loop></audio>
 
@@ -431,7 +431,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
       <section class="panel p-5">
         <div class="flex items-center justify-between mb-3">
           <h2 class="orb text-sm tracking-widest t-run">DASHBOARD</h2>
-          <button id="btnClear" class="btn btn-ghost btn-sm text-xs">清除戰績</button>
+          <span class="flex gap-2"><button id="btnDice" class="btn btn-ghost btn-sm text-xs">骰子統計</button><button id="btnClear" class="btn btn-ghost btn-sm text-xs">清除戰績</button></span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="statGrid"></div>
         <div class="mt-3">
@@ -439,7 +439,8 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
           <div class="h-2 rounded-full overflow-hidden flex bar"><div id="wr1" style="width:50%;background:var(--p1)"></div><div id="wr2" style="width:50%;background:var(--p2)"></div></div>
         </div>
         <div class="mt-5">
-          <h3 class="orb text-xs tracking-widest t-run mb-2">DICE CHECK</h3>
+          <h3 id="diceCheck" class="text-sm font-bold t-run mb-1">骰子公平性檢查</h3>
+          <p class="text-[11px] dim mb-2 leading-relaxed">玩家與 AI 用的是同一顆骰子（同一個亂數函式），AI 等級只影響「選哪組、何時收手」，不會改變骰子機率。下面是實際紀錄，可自行對照。</p>
           <div id="diceStats"></div>
         </div>
       </section>
@@ -667,9 +668,10 @@ const prefs=store.get('cantstop.prefs.v1',{mode:'ai',level:3,vol:60,track:0,them
 
 const INC='https://incompetech.com/music/royalty-free/mp3-royaltyfree/';
 const TRACKS=[
-  {name:'Cyberpunk Synthwave',style:'synthwave',url:INC+'Neon%20Laser%20Horizon.mp3'},
-  {name:'Lofi Chill Beats',style:'lofi',url:INC+'Dreamy%20Flashback.mp3'},
-  {name:'Sci-Fi Ambient',style:'ambient',url:INC+'Floating%20Cities.mp3'}
+  // urls 依序嘗試：同站 music/（GitHub Pages 回 audio/mpeg；incompetech 回的是 application/octet-stream，iOS Safari 不一定肯播）→ 原站 → 合成器
+  {name:'Cyberpunk Synthwave',style:'synthwave',urls:['music/synthwave.mp3',INC+'Neon%20Laser%20Horizon.mp3']},
+  {name:'Lofi Chill Beats',style:'lofi',urls:['music/chill.mp3',INC+'Chill%20Wave.mp3']},
+  {name:'Sci-Fi Ambient',style:'ambient',urls:['music/ambient.mp3',INC+'Floating%20Cities.mp3']}
 ];
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 const Synth={
@@ -716,17 +718,42 @@ const STYLES={
     if(s%2===0)S.tone(b,t,mtof(root+12+ch[(s/2+bar)%5]),spb*1.8,'square',.045,2400);
     if(s===0)for(const n of[0,third,7])S.tone(b,t,mtof(root+12+n),spb*15,'sawtooth',.035,1200,.4);
   }},
-  lofi:{bpm:74,on(step,t,spb,S,b){
-    const bar=Math.floor(step/16)%4,s=step%16,sw=s%2?spb*.28:0;
-    const ch=[[50,53,57,60],[55,59,62,65],[48,52,55,59],[45,48,52,55]][bar];
-    if(s===0||s===7)for(const n of ch)S.tone(b,t+sw,mtof(n+12),spb*(s?6:9),'triangle',s?.045:.07,950,.04);
-    if(s===0)S.tone(b,t,mtof(ch[0]-12),spb*8,'sine',.16,400,.03);
-    if(s===0||s===10)S.kick(b,t,.4);
-    if(s===4||s===12)S.noise(b,t,.16,.09,1400,'bandpass');
-    if(s%2===0)S.noise(b,t+sw,.03,.025,6000);
-    if(Math.random()<.5)S.noise(b,t+Math.random()*spb,.012,.03,3000);
-    if(s%2===0&&Math.random()<.3){const pen=[0,2,4,7,9];S.tone(b,t+sw,mtof(72+pen[Math.floor(Math.random()*5)]),spb*3,'sine',.06,2000,.02);}
-  }},
+  /* lofi：8 小節和弦進行（七/九和弦）＋每小節不同的伴奏節奏、會走動的 bass、swing 鼓組、
+   * 以樂句為單位的旋律（A A' B 休息…，第二輪降八度換音色），避免「幾個音一直重複」 */
+  lofi:{bpm:76,
+    chords:[[50,53,57,60,64],[43,53,57,59,64],[48,52,55,59,62],[45,52,55,60,64],[41,52,57,60,64],[40,50,55,59,62],[50,53,57,60,65],[43,53,56,59,63]],
+    comp:[[0,7,11],[0,6,10,14],[0,7,12],[0,5,11],[0,7,11],[0,6,10],[0,7,12,14],[0,4,8,12]],
+    phrases:[[[0,2,3],[3,3,2],[6,4,4],[12,3,3]],[[2,4,2],[4,5,2],[6,4,2],[8,2,5]],[[0,5,3],[4,4,2],[7,3,2],[10,2,2],[12,0,4]],[[8,1,3],[12,2,4]],
+             [[0,7,2],[2,6,2],[4,5,2],[6,4,3],[10,5,5]],[[1,3,2],[4,2,2],[7,3,2],[9,5,6]]],
+    order:[0,1,0,3,2,1,4,3, 5,3,2,1,0,4,5,3],
+    on(step,t,spb,S,b){
+      const bar=Math.floor(step/16),s=step%16,ci=bar%8,ch=this.chords[ci],sw=s%2?spb*.3:0,tt=t+sw,cyc=Math.floor(bar/16)%2;
+      // 電鋼琴伴奏：兩個微失諧的波疊出厚度，力度隨拍點變化
+      if(this.comp[ci].includes(s)){const v=s===0?.06:.038;
+        for(const n of ch.slice(1)){S.tone(b,tt,mtof(n+12),spb*(s===0?7:3.5),'triangle',v,1100,.02);S.tone(b,tt,mtof(n+12.07),spb*(s===0?7:3.5),'sine',v*.7,1600,.03);}}
+      // bass：根音→五度→經過音走向下一個和弦
+      const root=ch[0]-12,nextRoot=this.chords[(ci+1)%8][0]-12;
+      if(s===0)S.tone(b,t,mtof(root),spb*5,'sine',.2,380,.02);
+      if(s===8)S.tone(b,tt,mtof(root+7),spb*3,'sine',.15,380,.02);
+      if(s===11&&bar%2)S.tone(b,tt,mtof(root+12),spb*2,'sine',.11,420,.02);
+      if(s===14)S.tone(b,tt,mtof(nextRoot+(nextRoot>root?-2:2)),spb*2,'sine',.13,380,.02);
+      // 鼓：kick 會變化、snare 帶 ghost note、swing hi-hat 有強弱
+      if(s===0||s===10||(s===7&&bar%2)||(s===13&&bar%4===3))S.kick(b,tt,s===0?.42:.3);
+      if(s===4||s===12){S.noise(b,tt,.17,.1,1500,'bandpass');S.tone(b,tt,190,.09,'triangle',.07,900,.003,120);}
+      if((s===15&&bar%2)||(s===9&&bar%4===2))S.noise(b,tt,.07,.035,1700,'bandpass');
+      if(s%2===0||s%4===3)S.noise(b,tt,.03,s%4===0?.03:.017,6500);
+      if(bar%8===7&&s>=12)S.noise(b,tt,.06,.05+.012*(s-12),2200,'bandpass');          // 每 8 小節一個小過門
+      // 黑膠雜訊
+      if(Math.random()<.55)S.noise(b,t+Math.random()*spb,.01,.022,3200);
+      // 旋律樂句（前 2 小節當前奏不出旋律；第二輪降八度、換成較悶的音色）
+      if(bar<2)return;
+      const ph=this.phrases[this.order[(bar-2)%16]],pent=[0,2,4,7,9];
+      for(const[st,d,len]of ph)if(st===s){
+        const n=(cyc?60:72)+pent[d%5]+12*Math.floor(d/5);
+        S.tone(b,tt,mtof(n),spb*len*1.15,cyc?'triangle':'sine',cyc?.075:.085,cyc?1400:2600,.015);
+        S.tone(b,tt+spb*1.5,mtof(n),spb*len*.6,'sine',.02,1800,.02);                  // 淡淡的回音
+      }
+    }},
   ambient:{bpm:60,on(step,t,spb,S,b){
     if(step%32===0){const root=[38,41,36,43][Math.floor(step/32)%4];
       for(const n of[0,7,12,16,19])for(const dt of[-.08,.08])S.tone(b,t,mtof(root+12+n+dt),10,'sine',.04,1500,3.5);
@@ -759,17 +786,23 @@ const BGM={
   play(){
     this.halt();this.playing=true;this.source='stream';Synth.ensure();
     const tr=TRACKS[prefs.track],my=++this.req,a=this.audio;
-    const fallback=()=>{if(my!==this.req||!this.playing||this.source==='synth')return;a.pause();this.source='synth';Synth.start(tr.style);this.ui();};
-    a.onerror=fallback;a.src=tr.url;
-    a.play().catch(e=>{if(e&&e.name!=='AbortError')fallback();});
-    this.to=setTimeout(()=>{if(a.readyState<2)fallback();},9000);
+    let k=0;
+    const next=()=>{                                        // 這個來源失敗 → 換下一個；全失敗才用合成器
+      if(my!==this.req||!this.playing||this.source==='synth')return;
+      clearTimeout(this.to);
+      if(k>=tr.urls.length){a.pause();this.source='synth';Synth.start(tr.style);this.ui();return;}
+      a.src=tr.urls[k++];
+      a.play().catch(e=>{if(e&&e.name!=='AbortError')next();});
+      this.to=setTimeout(()=>{if(a.readyState<2)next();},12000);
+    };
+    a.onerror=next;next();
     this.ui();
   },
   pause(){this.req++;this.playing=false;this.halt();this.ui();},
   ui(){
     $('#bgmPlay').classList.toggle('on',this.playing);$('#eq').classList.toggle('on',this.playing);
     $('#icoPlay').classList.toggle('hidden',this.playing);$('#icoPause').classList.toggle('hidden',!this.playing);
-    const el=$('#bgmSrc');el.textContent=!this.playing?'':this.source==='synth'?'SYNTH':'LIVE';
+    const el=$('#bgmSrc');el.textContent=!this.playing?'':this.source==='synth'?'合成':'';
     el.title=this.source==='synth'?'串流音源無法載入，使用內建合成器':'串流播放中';
   }
 };
@@ -1182,6 +1215,7 @@ $('#btnClear').onclick=e=>{
   clearTimeout(clearArm);clearArm=null;b.textContent='清除戰績';b.style.borderColor=b.style.color='';
   stats={...STAT_DEF};store.set(STAT_KEY,stats);renderStats();
 };
+$('#btnDice').onclick=()=>$('#diceCheck').scrollIntoView({behavior:'smooth',block:'start'});
 BGM.init();renderLobby();renderStats();applyTheme(prefs.theme);if(!prefs.tutDone)$('#btnTut').classList.add('nudge');
 window.__cs={G,Rules,AI,startGame,applyTheme,Tut,PIECES,prefs};
 }

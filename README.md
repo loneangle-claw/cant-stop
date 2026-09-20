@@ -23,7 +23,7 @@
 - **一屏放得下**：遊戲頁固定 `100dvh`，棋盤格子大小用容器查詢單位 `cqw/cqh` 由剩餘空間推算，手機不必捲動、不會被頂列蓋到
 - **戰績看板**：LocalStorage 永久保存場數、勝場、最高連勝、爆掉次數
 - **骰子統計（DICE CHECK）**：驗證骰子公平用。記錄雙方擲骰次數、每擲 6 組兩兩點數和（2–12）的實際比例 vs 兩顆公平骰的理論值，以及實際爆掉率 vs 理論爆掉率（＝每次擲骰前畫面顯示的爆掉機率平均）。教學的固定骰點不計入
-- **背景音樂**：3 種風格串流（Kevin MacLeod, CC BY 4.0），載入失敗自動改用內建 Web Audio 合成器
+- **背景音樂**：3 首 Kevin MacLeod（incompetech.com，CC BY 4.0，頁尾已署名）：Neon Laser Horizon／Chill Wave／Floating Cities。來源依序嘗試：同站 `music/*.mp3`（GitHub Pages 回 `audio/mpeg`）→ incompetech 原站（回的是 `application/octet-stream`，iOS Safari 不一定肯播）→ 內建 Web Audio 合成器（音樂列會顯示「合成」）
 
 ## 開發
 
