@@ -147,6 +147,17 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 .stat b{display:block;font-family:var(--font-disp);font-size:1.9rem;line-height:1.1;color:var(--c);text-shadow:0 0 var(--gr) color-mix(in srgb,var(--c) var(--ga),transparent)}
 .stat span{font-size:.74rem;color:var(--ink-dim)}
 .stat small{display:block;font-size:.66rem;color:var(--ink-faint);margin-top:2px}
+/* 骰子統計：每個點數和兩根長條（玩家 1／玩家 2·AI）＋一條理論值橫線 */
+.dsum{display:grid;grid-template-columns:auto repeat(4,1fr);gap:2px 8px;font-size:.7rem;line-height:1.7;color:var(--ink-dim);text-align:right}.dsum>:nth-child(5n+1){text-align:left;white-space:nowrap}.dsum b{color:var(--ink);font-weight:700}
+.dchart{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin-top:8px}
+.dcol{text-align:center;font-size:.62rem;color:var(--ink-faint);font-family:var(--font-disp)}
+.dbars{position:relative;height:64px;display:flex;align-items:flex-end;justify-content:center;gap:2px;border-bottom:max(1px,calc(var(--bw) - 1px)) solid var(--ink-faint);margin-bottom:3px}
+.dbars i{display:block;width:38%;min-height:1px;border-radius:2px 2px 0 0;transition:height .4s}
+.dbars i.b0{background:var(--p1)}.dbars i.b1{background:var(--p2)}
+.dbars u{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--ink);opacity:.7}
+.dleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.66rem;color:var(--ink-dim);margin-top:6px}
+.dleg span::before{content:'';display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;border-radius:2px;background:var(--k)}
+.dleg span.th::before{height:0;border-top:2px dashed var(--ink);background:none;vertical-align:3px}
 .bar{background:var(--trk-off);border:calc(var(--bw) - 1px) solid var(--input-bd)}
 /* ---------- 遊戲版面：整頁剛好一個視窗高，棋盤吃剩餘空間（不必捲動、不會被頂列蓋到） ---------- */
 #game{height:100dvh;box-sizing:border-box;overflow:hidden auto;
@@ -411,6 +422,10 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
         <div class="mt-3">
           <div class="flex justify-between text-[11px] dim mb-1"><span class="t-p1">玩家 1</span><span id="wrTxt">—</span><span class="t-p2">玩家 2 / AI</span></div>
           <div class="h-2 rounded-full overflow-hidden flex bar"><div id="wr1" style="width:50%;background:var(--p1)"></div><div id="wr2" style="width:50%;background:var(--p2)"></div></div>
+        </div>
+        <div class="mt-5">
+          <h3 class="orb text-xs tracking-widest t-run mb-2">DICE CHECK</h3>
+          <div id="diceStats"></div>
         </div>
       </section>
     </div>
@@ -747,7 +762,16 @@ const BGM={
 /* =====================================================================
  * 4. 戰績 Stats（LocalStorage）
  * ===================================================================== */
-const STAT_KEY='cantstop.stats.v1',STAT_DEF={games:0,w0:0,w1:0,best:0,cur:0,b0:0,b1:0};
+const STAT_KEY='cantstop.stats.v1',STAT_DEF={games:0,w0:0,w1:0,best:0,cur:0,b0:0,b1:0,dice:null};
+/* 骰子統計（驗證公平性用）：每位玩家的擲骰次數、6 組兩兩點數和的出現次數、實際爆掉次數，
+ * 以及「每次擲骰前顯示的爆掉機率」加總（＝理論上該爆幾次）。教學的固定骰點不計入。 */
+const SUM_THEORY=[1,2,3,4,5,6,5,4,3,2,1].map(x=>x/36);
+const diceStat=p=>{if(!Array.isArray(stats.dice))stats.dice=[0,1].map(()=>({rolls:0,sums:Array(11).fill(0),busts:0,exp:0}));return stats.dice[p];};
+function recordRoll(st,pBust,bust){
+  const d=diceStat(st.current);d.rolls++;d.exp+=pBust;if(bust)d.busts++;
+  for(const sp of SPLITS)for(const pr of sp)d.sums[st.dice[pr[0]]+st.dice[pr[1]]-2]++;
+  store.set(STAT_KEY,stats);
+}
 let stats=store.get(STAT_KEY,STAT_DEF);
 function renderStats(){
   const tiles=[['總遊玩場數',stats.games,'--accent-ink',''],['玩家 1 勝場',stats.w0,'--p1-ink',''],['玩家 2 / AI 勝場',stats.w1,'--p2-ink',''],
@@ -755,6 +779,14 @@ function renderStats(){
   $('#statGrid').innerHTML=tiles.map(([l,v,c,s],i)=>`<div class="stat ${i===4?'col-span-2 sm:col-span-2':''}" style="--c:var(${c})"><b>${v}</b><span>${l}</span>${s?`<small>${s}</small>`:''}</div>`).join('');
   const tot=stats.w0+stats.w1,r=tot?stats.w0/tot*100:50;
   $('#wr1').style.width=r+'%';$('#wr2').style.width=(100-r)+'%';
+  const D=[diceStat(0),diceStat(1)],pc=(a,b)=>b?(a/b*100).toFixed(1)+'%':'—',who=['玩家 1','玩家 2 / AI'];
+  const tot6=D.map(d=>d.rolls*6);
+  $('#diceStats').innerHTML=`<div class="dsum"><span></span><span>擲骰</span><span>爆掉</span><span>實際爆率</span><span>理論爆率</span>${D.map((d,p)=>`<span class="t-p${p+1} font-bold">${who[p]}</span><b>${d.rolls}</b><b>${d.busts}</b><b>${pc(d.busts,d.rolls)}</b><b>${pc(d.exp,d.rolls)}</b>`).join('')}</div>`+
+    `<div class="dchart" role="img" aria-label="兩兩點數和 2 到 12 的出現比例，與理論值比較">${SUM_THEORY.map((t,i)=>{
+      const v=D.map((d,p)=>tot6[p]?d.sums[i]/tot6[p]:0),h=x=>Math.min(100,x/.22*100).toFixed(1);
+      return`<div class="dcol" title="點數和 ${i+2}｜理論 ${(t*100).toFixed(1)}%｜玩家 1 ${(v[0]*100).toFixed(1)}%（${D[0].sums[i]} 次）｜玩家 2/AI ${(v[1]*100).toFixed(1)}%（${D[1].sums[i]} 次）"><div class="dbars"><i class="b0" style="height:${h(v[0])}%"></i><i class="b1" style="height:${h(v[1])}%"></i><u style="bottom:${h(t)}%"></u></div>${i+2}</div>`;}).join('')}</div>
+    <div class="dleg"><span style="--k:var(--p1)">玩家 1</span><span style="--k:var(--p2)">玩家 2 / AI</span><span class="th">理論值</span></div>
+    <p class="text-[10px] faint mt-2 leading-relaxed">長條＝每次擲骰 6 組「兩兩點數和」的實際比例，虛線＝兩顆公平骰子的理論值。「理論」爆掉率＝每次擲骰前畫面顯示的爆掉機率平均，所以你擲得越兇它本來就越高。${D[0].rolls+D[1].rolls<200?'目前樣本少於 200 擲，上下波動幾個百分點都正常。':''}</p>`;
   $('#wrTxt').textContent=tot?`勝率 ${Math.round(r)}% : ${100-Math.round(r)}%`:'尚無對戰紀錄';
 }
 
@@ -898,7 +930,9 @@ function beginTurn(){G.st.phase='start';G.st.options=[];G.aiMsg='';renderAll();i
 
 async function doRoll(tok){
   const st=G.st;st.phase='rolling';st.options=[];clearPreview();renderAll();
-  st.dice=(G.forceDice&&G.forceDice.shift())||Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
+  const pBust=Rules.bustProb(st),forced=G.forceDice&&G.forceDice.shift();
+  st.dice=forced||Rules.rollDice();st.dice.forEach((v,i)=>setDie(i,v,true));SFX.roll();
+  if(!forced)recordRoll(st,pBust,!Rules.options(st,st.dice).some(o=>o.plays.length));
   await sleep(650);if(tok!==G.token)return false;
   st.options=Rules.options(st,st.dice);
   if(!st.options.some(o=>o.plays.length)){st.phase='choose';renderAll();await sleep(500);if(tok!==G.token)return false;await doBust(tok);return false;}
