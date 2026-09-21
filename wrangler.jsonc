@@ -6,6 +6,8 @@
   "name": "cant-stop",
   "main": "worker/index.js",
   "compatibility_date": "2026-09-01",
+  // 明確開啟 *.workers.dev 網址（前端的 NET_ORIGIN 連的就是它）
+  "workers_dev": true,
   "assets": {
     "directory": "./docs",
     "binding": "ASSETS",
